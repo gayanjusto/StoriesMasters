@@ -11,7 +11,10 @@ namespace Assets.Scripts.Services
     public class AttackTargetService : IAttackTargetService
     {
         private readonly IDirectionService _directionService;
-        private const float targetSphereRadius = .0025f;
+        private const float targetStockSphereRadius = .0025f;
+        private const float targetSwingSphereRadius = .2f;
+
+
         public AttackTargetService()
         {
             _directionService = IoCContainer.GetImplementation<IDirectionService>();
@@ -33,6 +36,17 @@ namespace Assets.Scripts.Services
             return new Vector2(attackerPosition.x, attackerPosition.y);
         }
 
+        public Vector2 GetSwingPivotPositionByFacingDirection(Vector3 attackerPosition, DirectionEnum facingDirection)
+        {
+            float horizontalOffset = _directionService.GetAxisUnitValueByHorizontalDirection(facingDirection);
+            float verticalOffset = _directionService.GetAxisUnitValueByVerticalDirection(facingDirection);
+
+            attackerPosition.x += horizontalOffset;
+            attackerPosition.y += verticalOffset;
+
+            return new Vector2(attackerPosition.x, attackerPosition.y);
+        }
+
         public Vector3[] GetSwingAttackVector3ByDirections(DirectionEnum horizontalValue, DirectionEnum verticalValue)
         {
             throw new NotImplementedException();
@@ -43,7 +57,7 @@ namespace Assets.Scripts.Services
             Vector2 targetingPosition = GetStockAttackVector2ByDirections(attackingObj.transform.position, 
                 attackingObjHorizontalValue, attackingObjVerticalValue);
 
-            Collider2D[] targets = Physics2D.OverlapCircleAll(targetingPosition, targetSphereRadius).Where(x => x.gameObject != attackingObj).ToArray();
+            Collider2D[] targets = Physics2D.OverlapCircleAll(targetingPosition, targetStockSphereRadius).Where(x => x.gameObject != attackingObj).ToArray();
             if(targets == null || targets.Length == 0)
             {
                 return null;
@@ -55,6 +69,28 @@ namespace Assets.Scripts.Services
             }
 
             return targets[0].gameObject;
+        }
+
+        public GameObject[] GetTargetsForSwingAttack(GameObject attackingObj, DirectionEnum attackingObjHorizontalValue, DirectionEnum attackingObjVerticalValue)
+        {
+
+            DirectionEnum facingDirection = _directionService.GetFacingDirection(attackingObjHorizontalValue, attackingObjVerticalValue);
+
+            Vector2 targetingPosition = GetSwingPivotPositionByFacingDirection(attackingObj.transform.position, facingDirection);
+
+            Collider2D[] targets = Physics2D.OverlapCircleAll(targetingPosition, targetSwingSphereRadius).Where(x => x.gameObject != attackingObj).ToArray();
+
+            if (targets == null || targets.Length == 0)
+            {
+                return null;
+            };
+
+            if (targets[0].tag != Tags.Targetable || targets[0].gameObject == attackingObj)
+            {
+                return null;
+            }
+
+            return targets.Select(x => x.gameObject).ToArray();
         }
     }
 }

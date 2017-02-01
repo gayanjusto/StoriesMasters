@@ -10,5 +10,6 @@ namespace Assets.Scripts.Interfaces.Services
         float GetAxisUnitValueByHorizontalDirection(DirectionEnum horizontalValue);
         int GetAxisValueByVerticalDirection(DirectionEnum verticalValue);
         float GetAxisUnitValueByVerticalDirection(DirectionEnum verticalValue);
+        DirectionEnum GetFacingDirection(DirectionEnum horizontalValue, DirectionEnum verticalValue);
     }
 }

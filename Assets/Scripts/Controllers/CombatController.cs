@@ -35,6 +35,23 @@ namespace Assets.Scripts.Controllers
 
             return attackService.AttackTarget(attackingObj, target);
         }
+
+        bool SwingAttack(GameObject attackingObj)
+        {
+            IAttackTargetService attackTargetService = IoCContainer.GetImplementation<IAttackTargetService>();
+            IAttackService attackService = IoCContainer.GetImplementation<IAttackService>();
+            IMovementManager movementManager = attackingObj.GetComponent<IMovementManager>();
+
+            var targets = attackTargetService.GetTargetsForSwingAttack(attackingObj,
+             movementManager.GetHorizontalFacingDirection(), movementManager.GetVerticalFacingDirection());
+
+            if (targets == null)
+            {
+                return false;
+            }
+
+            return attackService.AttackTargets(attackingObj, targets);
+        }
         #endregion
         public bool Attack(GameObject attackingObj)
         {
@@ -65,9 +82,7 @@ namespace Assets.Scripts.Controllers
                     case AttackTypeEnum.Stock:
                     return StockAttack(attackingObj);
                     case AttackTypeEnum.Swing:
-                    //AttackTargetService: get targets surrouding object
-                    //attack target
-                    break;
+                    return SwingAttack(attackingObj);
                     case AttackTypeEnum.SemiSwing:
                     //AttackTargetService: get targets surrouding 3 blocks object
                     //attack target

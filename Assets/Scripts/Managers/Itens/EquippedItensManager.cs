@@ -15,7 +15,7 @@ namespace Assets.Scripts.Managers.Itens
                 Weight = 2.0,
                 Damage = 40,
                 SkillUsed = "SwordsSkill",
-                AttackType = AttackTypeEnum.Stock
+                AttackType = AttackTypeEnum.Swing
             };
             return _equippedWeapon;
         }

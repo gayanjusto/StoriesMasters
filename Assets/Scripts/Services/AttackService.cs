@@ -28,6 +28,7 @@ namespace Assets.Scripts.Services
         {
             BaseCreature attacker = attackerObj.GetComponent<IObjectManager>().GetBaseCreature();
             var equippedWeapon = attackerObj.GetComponent<IEquippedItensManager>().GetEquippedWeapon();
+            double damageDealtToTarget = attacker.GetDamageDealt(equippedWeapon);
 
             for (int i = 0; i < targetsObjs.Length; i++)
             {
@@ -35,15 +36,16 @@ namespace Assets.Scripts.Services
 
                 if (!attacker.CanAttackTarget(target))
                 {
-                    return false;
+                    return false; //If target has simply dodged, it should continue the attack to the next target
                 }
-                double damageDealtToTarget = attacker.GetDamageDealt(equippedWeapon);
 
                 //Decrease damage by each target
                 if (i > 0)
                 {
                     damageDealtToTarget -= (damageDealtToTarget * (i * 10)) / (100);
                 }
+
+                target.ReceiveDamage(damageDealtToTarget);
             }
             return true;
         }

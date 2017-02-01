@@ -1,8 +1,4 @@
-﻿using Assets.Scripts.Entities.IntelligentBodies;
-using Assets.Scripts.Interfaces.Managers.Objects;
-using Assets.Scripts.Interfaces.Controllers;
-using Assets.Scripts.IoC;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Scripts.Managers.Combat
 {
@@ -23,14 +19,19 @@ namespace Assets.Scripts.Managers.Combat
             {
                 TickTime();
             }
-            else
+            else if(_hasCastAction)
             {
                 ResetTickTime();
                 _hasCastAction = false;
                 _movementController.EnableMovement(gameObject);
             }
+
+            CheckIfAttackSequenceIsValid();
         }
 
+        //<summary>
+        //Methods used to enable combat input after an action
+        //</summary>
         void WaitForCombatInputDelay()
         {
             if (_combatInputTime > 0)
@@ -56,11 +57,6 @@ namespace Assets.Scripts.Managers.Combat
         {
             _combatInputTime = 0;
         }
-
-        void ResetAttackSequence()
-        {
-            _attackSequence = 0;
-        }
         #endregion
 
         public override void DisableAttackerActions()
@@ -72,6 +68,7 @@ namespace Assets.Scripts.Managers.Combat
         public override void IncreaseSequenceWaitForAction()
         {
             _hasCastAction = true;
+            GetTimeToResetAttackSequence();
 
             if (_attackSequence == _creature.GetMaximumAttacks())
             {

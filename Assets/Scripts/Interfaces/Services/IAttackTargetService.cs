@@ -9,5 +9,6 @@ namespace Assets.Scripts.Interfaces.Services
         Vector3[] GetSemiSwingAttackVector3ByDirections(DirectionEnum horizontalValue, DirectionEnum verticalValue);
         Vector3[] GetSwingAttackVector3ByDirections(DirectionEnum horizontalValue, DirectionEnum verticalValue);
         GameObject GetTargetForStockAttack(GameObject attackingObj, DirectionEnum attackingObjHorizontalValue, DirectionEnum attackingObjVerticalValue);
+        GameObject[] GetTargetsForSwingAttack(GameObject attackingObj, DirectionEnum attackingObjHorizontalValue, DirectionEnum attackingObjVerticalValue);
     }
 }

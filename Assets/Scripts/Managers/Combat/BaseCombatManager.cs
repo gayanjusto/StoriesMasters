@@ -3,14 +3,17 @@ using Assets.Scripts.Entities.IntelligentBodies;
 using Assets.Scripts.IoC;
 using Assets.Scripts.Interfaces.Managers.Objects;
 using Assets.Scripts.Interfaces.Managers.Combat;
+using UnityEngine;
 
 namespace Assets.Scripts.Managers.Combat
 {
     public class BaseCombatManager : TickTimeManager, ICombatManager
     {
-        protected int _attackSequence;
-        protected float _combatInputTime;
-        protected const float _combatInputDelayTime = .05f;
+        public int _attackSequence;
+        public float _combatInputTime;
+        public const float _combatInputDelayTime = .1f;
+        public float _timeResetAttackSequence;
+
         protected BaseCreature _creature;
         protected IMovementController _movementController;
         protected ICombatController _combatController;
@@ -38,11 +41,37 @@ namespace Assets.Scripts.Managers.Combat
             }
         }
 
-
-        void ResetAttackSequence()
+        protected void ResetAttackSequence()
         {
             _attackSequence = 0;
 
+        }
+
+        protected void GetTimeToResetAttackSequence()
+        {
+            _timeResetAttackSequence = _combatController.GetAttackDelayBasedOnEquippedWeapon(gameObject, false) + 3.0f;
+        }
+
+        protected bool IsInAttackSequence()
+        {
+            return _timeResetAttackSequence > 0;
+        }
+
+        protected void TickAttackSequenceTime()
+        {
+            _timeResetAttackSequence -= Time.deltaTime;
+        }
+
+        protected void CheckIfAttackSequenceIsValid()
+        {
+            if (IsInAttackSequence())
+            {
+                TickAttackSequenceTime();
+            }
+            else if (_attackSequence > 0)
+            {
+                ResetAttackSequence();
+            }
         }
         #endregion
         public virtual void DisableAttackerActions()
@@ -52,6 +81,7 @@ namespace Assets.Scripts.Managers.Combat
         public virtual void IncreaseSequenceWaitForAction()
         {
             _hasCastAction = true;
+            GetTimeToResetAttackSequence();
 
             if (_attackSequence == _creature.GetMaximumAttacks())
             {
@@ -73,5 +103,6 @@ namespace Assets.Scripts.Managers.Combat
         {
             return !IsWaitingFreezeTime() || !_hasCastAction;
         }
+
     }
 }

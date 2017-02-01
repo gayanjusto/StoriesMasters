@@ -1,7 +1,6 @@
 ﻿using Assets.Scripts.Entities.Itens.Weapons;
 using Assets.Scripts.Entities.Skills.Aggregators;
 using Assets.Scripts.Enums;
-using System;
 
 namespace Assets.Scripts.Entities.IntelligentBodies
 {
@@ -68,14 +67,24 @@ namespace Assets.Scripts.Entities.IntelligentBodies
 
         public float GetTimeToRecoverFromLastAttack(BaseWeaponItem equippedWeapon)
         {
-            return (float)(((Strength + Dexterity) / equippedWeapon.Weight) / 10) + 1.0f;
+            return GetDelayActionTime(equippedWeapon);
         }
 
         public float GetTimeToRecoverFromAction(BaseWeaponItem equippedWeapon)
         {
-            return (float)((Strength + Dexterity) / equippedWeapon.Weight) / 10;
+            float delayTime = GetDelayActionTime(equippedWeapon);
+            if (delayTime > 4.5f)
+                return 4.5f;
+            if (delayTime < 0.75f)
+                return 0.75f;
+
+            return delayTime;
         }
 
+        float GetDelayActionTime(BaseWeaponItem equippedWeapon)
+        {
+            return (float)equippedWeapon.Weight * 100 / (Strength + Dexterity);
+        }
         public bool CanAttackTarget(BaseCreature target)
         {
             //return: Int + Dex + Skill + Rand 100 X enemie's
@@ -85,7 +94,7 @@ namespace Assets.Scripts.Entities.IntelligentBodies
         public double GetDamageDealt(BaseWeaponItem equippedWeapon)
         {
             double skillValue = CombatSkills.GetSkillValueByName(equippedWeapon.SkillUsed);
-            Random rnd = new Random();
+            System.Random rnd = new System.Random();
             
             if(equippedWeapon.AttackType != AttackTypeEnum.Ranged)
             {
