@@ -20,31 +20,16 @@ namespace Assets.Scripts.Services
             _directionService = IoCContainer.GetImplementation<IDirectionService>();
         }
 
-        public Vector3[] GetSemiSwingAttackVector3ByDirections(DirectionEnum horizontalValue, DirectionEnum verticalValue)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Vector2 GetStockAttackVector2ByDirections(Vector3 attackerPosition, DirectionEnum horizontalValue, DirectionEnum verticalValue)
-        {
-            float horizontalOffset = _directionService.GetAxisUnitValueByHorizontalDirection(horizontalValue);
-            float verticalOffset = _directionService.GetAxisUnitValueByVerticalDirection(verticalValue);
-
-            attackerPosition.x += horizontalOffset;
-            attackerPosition.y += verticalOffset;
-
-            return new Vector2(attackerPosition.x, attackerPosition.y);
-        }
-
-        public Vector2 GetSwingPivotPositionByFacingDirection(Vector3 attackerPosition, DirectionEnum facingDirection)
+  
+        public Vector3 GetAttackPivotPositionByFacingDirection(Vector3 attackerPosition, DirectionEnum facingDirection)
         {
             float horizontalOffset = _directionService.GetAxisUnitValueByHorizontalDirection(facingDirection);
             float verticalOffset = _directionService.GetAxisUnitValueByVerticalDirection(facingDirection);
 
             attackerPosition.x += horizontalOffset;
-            attackerPosition.y += verticalOffset;
+            attackerPosition.z += verticalOffset;
 
-            return new Vector2(attackerPosition.x, attackerPosition.y);
+            return new Vector3(attackerPosition.x, attackerPosition.y, attackerPosition.z);
         }
 
         public Vector3[] GetSwingAttackVector3ByDirections(DirectionEnum horizontalValue, DirectionEnum verticalValue)
@@ -52,10 +37,9 @@ namespace Assets.Scripts.Services
             throw new NotImplementedException();
         }
 
-        public GameObject GetTargetForStockAttack(GameObject attackingObj, DirectionEnum attackingObjHorizontalValue, DirectionEnum attackingObjVerticalValue)
+        public GameObject GetTargetForStockAttack(GameObject attackingObj, DirectionEnum facingDirection)
         {
-            Vector2 targetingPosition = GetStockAttackVector2ByDirections(attackingObj.transform.position, 
-                attackingObjHorizontalValue, attackingObjVerticalValue);
+            Vector3 targetingPosition = GetAttackPivotPositionByFacingDirection(attackingObj.transform.position, facingDirection);
 
             Collider2D[] targets = Physics2D.OverlapCircleAll(targetingPosition, targetStockSphereRadius).Where(x => x.gameObject != attackingObj).ToArray();
             if(targets == null || targets.Length == 0)
@@ -71,24 +55,23 @@ namespace Assets.Scripts.Services
             return targets[0].gameObject;
         }
 
-        public GameObject[] GetTargetsForSwingAttack(GameObject attackingObj, DirectionEnum attackingObjHorizontalValue, DirectionEnum attackingObjVerticalValue)
+        public GameObject[] GetTargetsForSwingAttack(GameObject attackingObj, DirectionEnum facingDirection)
         {
 
-            DirectionEnum facingDirection = _directionService.GetFacingDirection(attackingObjHorizontalValue, attackingObjVerticalValue);
+            Vector3 targetingPosition = GetAttackPivotPositionByFacingDirection(attackingObj.transform.position, facingDirection);
 
-            Vector2 targetingPosition = GetSwingPivotPositionByFacingDirection(attackingObj.transform.position, facingDirection);
-
-            Collider2D[] targets = Physics2D.OverlapCircleAll(targetingPosition, targetSwingSphereRadius).Where(x => x.gameObject != attackingObj).ToArray();
+            Collider[] targets = Physics.OverlapSphere(targetingPosition, targetSwingSphereRadius)
+                .Where(x => x.gameObject != attackingObj && x.tag == Tags.Targetable).ToArray();
 
             if (targets == null || targets.Length == 0)
             {
                 return null;
             };
 
-            if (targets[0].tag != Tags.Targetable || targets[0].gameObject == attackingObj)
-            {
-                return null;
-            }
+            //if (targets[0].tag != Tags.Targetable || targets[0].gameObject == attackingObj)
+            //{
+            //    return null;
+            //}
 
             return targets.Select(x => x.gameObject).ToArray();
         }

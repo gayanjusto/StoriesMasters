@@ -5,7 +5,7 @@ using Assets.Scripts.IoC;
 
 namespace Assets.Scripts.Managers.Movement
 {
-    public class BaseMovementManager : BaseManager, IMovementManager
+    public class BaseMovementManager : BaseManager/*, IMovementManager*/
     {
         public DirectionEnum _verticalDirection;
         public DirectionEnum _horizontalDirection;

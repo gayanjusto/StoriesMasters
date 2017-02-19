@@ -157,22 +157,22 @@ namespace Assets.Scripts.Services
                 return verticalValue;
             }
 
-            if(horizontalValue == DirectionEnum.Right && horizontalValue == DirectionEnum.Up)
+            if(horizontalValue == DirectionEnum.Right && verticalValue == DirectionEnum.Up)
             {
                 return DirectionEnum.UpRight;
             }
 
-            if (horizontalValue == DirectionEnum.Left && horizontalValue == DirectionEnum.Up)
+            if (horizontalValue == DirectionEnum.Left && verticalValue == DirectionEnum.Up)
             {
                 return DirectionEnum.UpLeft;
             }
 
-            if (horizontalValue == DirectionEnum.Right && horizontalValue == DirectionEnum.Down)
+            if (horizontalValue == DirectionEnum.Right && verticalValue == DirectionEnum.Down)
             {
                 return DirectionEnum.DownRight;
             }
 
-            if (horizontalValue == DirectionEnum.Left && horizontalValue == DirectionEnum.Down)
+            if (horizontalValue == DirectionEnum.Left && verticalValue == DirectionEnum.Down)
             {
                 return DirectionEnum.DownLeft;
             }
@@ -195,6 +195,32 @@ namespace Assets.Scripts.Services
             directions[4] = counterClockDirections[1];
 
             return directions;
+        }
+
+        public DirectionEnum GetHorizontalDirectionByValue(int value)
+        {
+            switch (value)
+            {
+                case 1:
+                    return DirectionEnum.Right;
+                case -1:
+                    return DirectionEnum.Left;
+                default:
+                    return DirectionEnum.None;
+            }
+        }
+
+        public DirectionEnum GetVerticalDirectionByValue(int value)
+        {
+            switch (value)
+            {
+                case 1:
+                    return DirectionEnum.Up;
+                case -1:
+                    return DirectionEnum.Down;
+                default:
+                    return DirectionEnum.None;
+            }
         }
     }
 }

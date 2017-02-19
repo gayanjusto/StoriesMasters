@@ -27,7 +27,7 @@ namespace Assets.Scripts.Managers.Combat
             _creature = gameObject.GetComponent<IObjectManager>().GetBaseCreature();
         }
 
-        void WaitForActionDelay()
+        protected void WaitForActionDelay()
         {
             if (_hasCastAction && IsWaitingFreezeTime())
             {
@@ -35,9 +35,7 @@ namespace Assets.Scripts.Managers.Combat
             }
             else
             {
-                ResetTickTime();
-                _hasCastAction = false;
-                _movementController.EnableMovement(gameObject);
+                EnableAttackerActions();
             }
         }
 
@@ -74,10 +72,25 @@ namespace Assets.Scripts.Managers.Combat
             }
         }
         #endregion
+
+        public virtual void EnableAttackerActions()
+        {
+            ResetTickTime();
+            _hasCastAction = false;
+            _movementController.EnableMovement(gameObject);
+        }
+
         public virtual void DisableAttackerActions()
         {
             _movementController.DisableMovement(gameObject);
         }
+
+        public virtual void DisableAttackerActions(float freezeTime)
+        {
+            _currentTickTime = freezeTime;
+            _hasCastAction = true;
+        }
+
         public virtual void IncreaseSequenceWaitForAction()
         {
             _hasCastAction = true;

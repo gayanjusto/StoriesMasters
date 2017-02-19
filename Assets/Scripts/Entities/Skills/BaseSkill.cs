@@ -5,10 +5,22 @@ namespace Assets.Scripts.Entities.Skills
     public abstract class BaseSkill
     {
         public string Name { get; set; }
-        public double SkillValue { get; set; }
-        protected  void EarnSkillPoint()
+        public float SkillValue { get; set; }
+
+        public  void EarnSkillPoint()
         {
-            throw new NotImplementedException();
+            if(SkillValue >= 100)
+            {
+                return;
+            }
+
+            float pointEarned = (1 / SkillValue);
+            if(pointEarned > 1)
+            {
+                pointEarned = 1;
+            }
+
+            SkillValue += pointEarned;
         }
     }
 }

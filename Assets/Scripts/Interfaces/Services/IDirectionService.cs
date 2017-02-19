@@ -11,5 +11,7 @@ namespace Assets.Scripts.Interfaces.Services
         int GetAxisValueByVerticalDirection(DirectionEnum verticalValue);
         float GetAxisUnitValueByVerticalDirection(DirectionEnum verticalValue);
         DirectionEnum GetFacingDirection(DirectionEnum horizontalValue, DirectionEnum verticalValue);
+        DirectionEnum GetHorizontalDirectionByValue(int value);
+        DirectionEnum GetVerticalDirectionByValue(int value);
     }
 }

@@ -72,6 +72,7 @@ namespace Assets.Scripts.Services
         private void SetStraightLineSpeed(Vector3 direction, GameObject movingObj, int directionValue, bool isRunning, Func<bool, float> speedCalculationMethod)
         {
             movingObj.transform.Translate((direction * speedCalculationMethod(isRunning)) * directionValue * Time.deltaTime);
+            //movingObj.GetComponent<Rigidbody>().AddForce((Vector3.up * speedCalculationMethod(isRunning)) * directionValue);
         }
 
     }

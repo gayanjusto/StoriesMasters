@@ -69,10 +69,7 @@ namespace Assets.Scripts.Controllers
 
         public void DisableMovement(GameObject movingObj)
         {
-            if(movingObj.tag == Tags.PlayerTag)
-            {
-                movingObj.GetComponent<IMovementManager>().Disable();
-            }
+            movingObj.GetComponent<IMovementManager>().Disable();
         }
 
         public void EnableMovement(GameObject movingObj)

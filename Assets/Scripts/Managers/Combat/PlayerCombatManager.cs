@@ -40,7 +40,7 @@ namespace Assets.Scripts.Managers.Combat
             }
             else
             {
-                _combatController.EnableCombatIinput(gameObject);
+                _combatController.EnableCombatInput(gameObject);
             }
         }
 
@@ -62,7 +62,7 @@ namespace Assets.Scripts.Managers.Combat
         public override void DisableAttackerActions()
         {
             _movementController.DisableMovement(gameObject);
-            _combatController.DisableCombatIinput(gameObject);
+            _combatController.DisableCombatInput(gameObject);
         }
 
         public override void IncreaseSequenceWaitForAction()

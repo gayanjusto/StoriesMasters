@@ -1,18 +1,38 @@
 ﻿using Assets.Scripts.Enums;
+using Assets.Scripts.Interfaces.Controllers;
+using Assets.Scripts.Interfaces.Managers.Movement;
+using Assets.Scripts.Interfaces.Services;
+using Assets.Scripts.IoC;
 using Assets.Scripts.Managers.Movement;
 using UnityEngine;
 
 namespace Assets.Scripts.Managers.Inputs
 {
-    public class PlayerMovementInputManager : BaseMovementManager
+    public class PlayerMovementInputManager : BaseManager, IMovementManager
     {
         private int _hVal;
         private int _vVal;
 
+        private IDirectionService _directionService;
+        protected IMovementController _movementController;
+
+        public DirectionEnum _verticalDirection;
+        public DirectionEnum _horizontalDirection;
+
+        public DirectionEnum _verticalFacingDirection;
+        public DirectionEnum _horizontalFacingDirection;
+        public DirectionEnum _facingDirection;
         public bool isRunning;
+
+        private void Start()
+        {
+            _directionService = IoCContainer.GetImplementation<IDirectionService>();
+            _movementController = IoCContainer.GetImplementation<IMovementController>();
+        }
 
         void FixedUpdate()
         {
+            _facingDirection = GetFacingDirection();
             _vVal= CheckUpDownMovement();
             _hVal = CheckLeftRightMovement();
             CheckRunning();
@@ -86,8 +106,8 @@ namespace Assets.Scripts.Managers.Inputs
 
             if (_hVal != 0 && _vVal != 0)
             {
-                _horizontalDirection = GetHorizontalValueByInput();
-                _verticalDirection = GetVerticalValueByInput();
+                _horizontalDirection = _directionService.GetHorizontalDirectionByValue(_hVal);
+                _verticalDirection = _directionService.GetVerticalDirectionByValue(_vVal);
 
                 _horizontalFacingDirection = _horizontalDirection;
                 _verticalFacingDirection = _verticalDirection;
@@ -95,7 +115,7 @@ namespace Assets.Scripts.Managers.Inputs
 
             if(_hVal != 0 && _vVal == 0)
             {
-                _horizontalDirection = GetHorizontalValueByInput();
+                _horizontalDirection = _directionService.GetHorizontalDirectionByValue(_hVal);
                 _horizontalFacingDirection = _horizontalDirection;
                 _verticalFacingDirection = DirectionEnum.None;
                 _verticalDirection = DirectionEnum.None;
@@ -103,7 +123,7 @@ namespace Assets.Scripts.Managers.Inputs
 
             if (_hVal == 0 && _vVal != 0)
             {
-                _verticalDirection = GetVerticalValueByInput();
+                _verticalDirection = _directionService.GetVerticalDirectionByValue(_vVal);
                 _verticalFacingDirection = _verticalDirection;
                 _horizontalFacingDirection = DirectionEnum.None;
                 _horizontalDirection = DirectionEnum.None;
@@ -111,30 +131,14 @@ namespace Assets.Scripts.Managers.Inputs
         }
 
 
-        DirectionEnum GetHorizontalValueByInput()
+        public bool IsMoving()
         {
-            switch (_hVal)
-            {
-                case 1:
-                return DirectionEnum.Right;
-                case -1:
-                return DirectionEnum.Left;
-                default:
-                return DirectionEnum.None;
-            }
+            return _horizontalDirection != DirectionEnum.None || _verticalDirection != DirectionEnum.None;
         }
 
-        DirectionEnum GetVerticalValueByInput()
+        public DirectionEnum GetFacingDirection()
         {
-            switch (_vVal)
-            {
-                case 1:
-                return DirectionEnum.Up;
-                case -1:
-                return DirectionEnum.Down;
-                default:
-                return DirectionEnum.None;
-            }
+            return _directionService.GetFacingDirection(_horizontalFacingDirection, _verticalFacingDirection);
         }
     }
 }

@@ -29,7 +29,9 @@ namespace Assets.Scripts.IoC
             IoCContainer.Register<IDirectionService, DirectionService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IAttackTargetService, AttackTargetService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IAttackService, AttackService>(IoCLifeCycleEnum.Singleton);
-            
+            IoCContainer.Register<ISkillPointService, SkillPointService>(IoCLifeCycleEnum.Singleton);
+
+
 
 
             //Controllers

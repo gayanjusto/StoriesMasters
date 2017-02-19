@@ -25,15 +25,21 @@ namespace Assets.Scripts.Controllers
             IAttackService attackService = IoCContainer.GetImplementation<IAttackService>();
             IMovementManager movementManager = attackingObj.GetComponent<IMovementManager>();
 
-            var target = attackTargetService.GetTargetForStockAttack(attackingObj,
-             movementManager.GetHorizontalFacingDirection(), movementManager.GetVerticalFacingDirection());
+            var target = attackTargetService.GetTargetForStockAttack(attackingObj, movementManager.GetFacingDirection());
 
             if(target == null)
             {
                 return false;
             }
 
-            return attackService.AttackTarget(attackingObj, target);
+            if(attackService.AttackTarget(attackingObj, target) != null)
+            {
+                MiniStunTarget(target);
+
+                return true;
+            }
+
+            return false;
         }
 
         bool SwingAttack(GameObject attackingObj)
@@ -42,27 +48,67 @@ namespace Assets.Scripts.Controllers
             IAttackService attackService = IoCContainer.GetImplementation<IAttackService>();
             IMovementManager movementManager = attackingObj.GetComponent<IMovementManager>();
 
-            var targets = attackTargetService.GetTargetsForSwingAttack(attackingObj,
-             movementManager.GetHorizontalFacingDirection(), movementManager.GetVerticalFacingDirection());
+            var targets = attackTargetService.GetTargetsForSwingAttack(attackingObj, movementManager.GetFacingDirection());
 
             if (targets == null)
             {
                 return false;
             }
 
-            return attackService.AttackTargets(attackingObj, targets);
+            if (attackService.AttackTargets(attackingObj, targets) != null)
+            {
+                MiniStunTargets(targets);
+
+                return true;
+            }
+
+            return false;
+        }
+
+
+        //<summary>
+        //Prevent aditional input flow
+        //</summary>
+        void DisablePlayerInputMovement(GameObject playerObj)
+        {
+            playerObj.GetComponent<IMovementManager>().Disable();
+        }
+        void EnablePlayerInputMovement(GameObject playerObj)
+        {
+            playerObj.GetComponent<IMovementManager>().Enable();
+        }
+
+        void MiniStunTarget(GameObject target)
+        {
+            ICombatManager targetCombatManager = target.GetComponent<ICombatManager>();
+            targetCombatManager.DisableAttackerActions(2.5f);
+        }
+
+        void MiniStunTargets(GameObject[] targets)
+        {
+            for (int i = 0; i < targets.Length; i++)
+            {
+                MiniStunTarget(targets[i]);
+            }
         }
         #endregion
+
         public bool Attack(GameObject attackingObj)
         {
             ICombatManager attackerCombatManager = attackingObj.GetComponent<ICombatManager>();
-
+            ISkillPointService skillPointService = IoCContainer.GetImplementation<ISkillPointService>();
             if (attackerCombatManager.CanAttack())
             {
                 attackerCombatManager.DisableAttackerActions();
                 attackerCombatManager.IncreaseSequenceWaitForAction();
-                return AttackByType(attackingObj);
+                bool successfulAttack = AttackByType(attackingObj);
 
+                if (successfulAttack)
+                {
+                    skillPointService.IncreaseCombatSkillPoint(attackingObj);
+                }
+
+                return successfulAttack;
                 //if attack was successful:
                 //disable target for brief time, while it recovers from attack
             }
@@ -96,12 +142,13 @@ namespace Assets.Scripts.Controllers
 
             return false;
         }
+
         public void Defend()
         {
 
         }
 
-        public void DisableCombatIinput(GameObject attackingObj)
+        public void DisableCombatInput(GameObject attackingObj)
         {
             if (attackingObj.tag == Tags.PlayerTag)
             {
@@ -109,7 +156,7 @@ namespace Assets.Scripts.Controllers
             }
         }
 
-        public void EnableCombatIinput(GameObject attackingObj)
+        public void EnableCombatInput(GameObject attackingObj)
         {
             if (attackingObj.tag == Tags.PlayerTag)
             {
@@ -131,19 +178,5 @@ namespace Assets.Scripts.Controllers
 
             return entity.GetTimeToRecoverFromAction(equippedItensManager.GetEquippedWeapon());
         }
-        #region PRIVATE METHODS
-
-        //<summary>
-        //Prevent aditional input flow
-        //</summary>
-        void DisablePlayerInputMovement(GameObject playerObj)
-        {
-            playerObj.GetComponent<IMovementManager>().Disable();
-        }
-        void EnablePlayerInputMovement(GameObject playerObj)
-        {
-            playerObj.GetComponent<IMovementManager>().Enable();
-        }
-        #endregion
     }
 }

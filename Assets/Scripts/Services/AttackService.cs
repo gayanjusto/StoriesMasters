@@ -2,13 +2,14 @@
 using Assets.Scripts.Interfaces.Managers.Itens;
 using Assets.Scripts.Interfaces.Managers.Objects;
 using Assets.Scripts.Interfaces.Services;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Services
 {
     public class AttackService : IAttackService
     {
-        public bool AttackTarget(GameObject attackerObj, GameObject targetObj)
+        public BaseCreature AttackTarget(GameObject attackerObj, GameObject targetObj)
         {
             BaseCreature attacker = attackerObj.GetComponent<IObjectManager>().GetBaseCreature();
             BaseCreature target = targetObj.GetComponent<IObjectManager>().GetBaseCreature();
@@ -19,24 +20,25 @@ namespace Assets.Scripts.Services
                 double damageDealtToTarget = attacker.GetDamageDealt(equippedWeapon);
                 target.ReceiveDamage(damageDealtToTarget);
 
-                return true;
+                return target;
             }
-            return false;
+            return null;
         }
 
-        public bool AttackTargets(GameObject attackerObj, GameObject[] targetsObjs)
+        public IList<BaseCreature> AttackTargets(GameObject attackerObj, GameObject[] targetsObjs)
         {
             BaseCreature attacker = attackerObj.GetComponent<IObjectManager>().GetBaseCreature();
             var equippedWeapon = attackerObj.GetComponent<IEquippedItensManager>().GetEquippedWeapon();
             double damageDealtToTarget = attacker.GetDamageDealt(equippedWeapon);
 
+            List<BaseCreature> creaturesHit = new List<BaseCreature>();
             for (int i = 0; i < targetsObjs.Length; i++)
             {
                 BaseCreature target = targetsObjs[i].GetComponent<IObjectManager>().GetBaseCreature();
 
                 if (!attacker.CanAttackTarget(target))
                 {
-                    return false; //If target has simply dodged, it should continue the attack to the next target
+                    return creaturesHit; //If target has simply dodged, it should continue the attack to the next target
                 }
 
                 //Decrease damage by each target
@@ -46,8 +48,9 @@ namespace Assets.Scripts.Services
                 }
 
                 target.ReceiveDamage(damageDealtToTarget);
+                creaturesHit.Add(target);
             }
-            return true;
+            return creaturesHit;
         }
     }
 }
