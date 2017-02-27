@@ -1,0 +1,94 @@
+Briefing: O aplicativo consiste na criação de um mundo feita por um Dungeon Master com a possibilidade de gerar lendas locais, spawn de monstros, cidades, dungeons, etc. A segunda parte do aplicativo é a possibilidade de jogar no mundo gerado pelo Dungeon Master, dentro das regras definidas pelos sistemas do jogo.
+
+-----------------------------------
+SISTEMAS
+-----------------------------------
+1. Atributos
+2. Skills
+3. Ganho de Atributos
+4. Ganho de Skills
+5. Profissões
+6. Combate
+
+
+
+1 - ATRIBUTOS
+
+	Os atributos podem ser distribuídos entre:
+		. Strength (STR): Define força do personagem para testes de resistência física e vontade
+		. Dexterity (DEX): Define agilidade do personagem para testes de velocidade e utilização de instrumentos
+		. Intelligence (INT): Define poder de conhecimento e boa execução de tarefas e para testes de vontade
+		
+	RN1: Os atributos podem chegar até o valor máximo de 100
+
+---------------
+
+2 - Skills
+
+	As skills são separadas em três categorias:
+		. Combate
+		. Sobrevivência
+		. Conhecimento
+	
+	RN1: Skills podem chegar ao valor máximo de 100
+
+---------------
+
+3 - Ganho de Atributos
+
+	Os atributos podem ser ganhos quando o jogador utilizar alguma skill ou habilidade de profissão relacionada a um atributo. São ganhos com o uso destes e quanto mais pontos possuir naquele atributo, mais difícil deverá ser progredir.
+	
+---------------
+
+4 - Ganho de Skills
+
+	As skills são ganhas com treinamento ou com uso progressivo. Quanto mais skill, mais difícil deve ser de ganhar um ponto. Para cada ação que utilize uma determinada skill, o jogador ganhará um ponto. A quantidade ganha será reduziada de acordo com o nível da skill.
+	
+	RN1: Treinamentos não podem ultrapassar 20% de skill.
+
+	
+---------------
+
+5 - Profissões
+
+---------------
+
+6 - Combate
+
+	O combate é divido em duas sessões: Ataque e Defesa.
+	
+	1) ATAQUE:
+		O fluxo básico de ataque consiste em:
+			. Atacante dispara o ataque	
+			. O ataque deverá ter um delay para ser desferido completamente, para que o atacado possa se defender.
+			. Atacante ficará imovel e indefeso enquanto a ação de ataque durar
+			. Aplicação deverá identificar o tipo de ataque desferido
+				1) Estocada: Um ataque simples um alvo a frente do atacante
+				2) Semi-braçada: Um ataque em giro partindo de um alvo à lateral direita do atacante até sua frente
+				3) Braçada Completada: Um ataque partindo do alvo à lateral do atacante até o lado oposto (meio-circulo)
+			. A aplicação deverá buscar os possíveis alvos de acordo com a região do ataque
+			. A aplicação deverá calcular o sucesso do ataque da seguinte forma:
+				1) Estocada: Acerto ou Falha simples
+				2) Semi-Braçada ou Braçada Completa: O valor do dano é reduzido em 1/4 por alvo acertado. Caso um alvo defenda o ataque o ataque será interrompido e os demais não passarão pelo teste. Caso um alvo esquive do ataque, o próximo poderá receber um dano equivalente ao total do anterior sem penalizar 1/4.
+			. Os alvos que receberem ataque sofrerão dano e uma penalidade de imobilidade por um curto período (0,5s)
+			. A aplicação retornará as ações do atacante, garantindo que os atacados possam recuperar antes do atacante.
+			
+	2) DEFESA:
+		O fluxo básico de defesa consiste em:
+			. O defensor deverá estar virado para o lado onde deseja defender
+			. A defesa deverá ser lançada antes que o delay do ataque desferido termine
+			. Existem três tipos de defesa: Defesa com Escudo, Defesa com Armas, Esquiva
+				1) Defesa com Escudo: Utiliza a skill de "Shields". Pode defender a diferença frontal e as laterais adjacentes.
+					Irá absorver todo o dano, que será repassado ao escudo. Ao defender com sucesso o defensor soferá um delay para
+					poder recuperar suas ações. A skill irá definir o quanto este tempo levará e o quanto de dano o escudo receberá ao defender.
+				2) Defesa com Armas: Pode defender em uma única direção. Utiliza a skill "Parry" para essa defesa. Ao defender 
+					a arma receberá integralmente o dano, porém o defensor poderá realizar sequencias mistas entre ataque e defesa ou 
+					instantaneamente defender um outro ataque em seguida. Se o jogador for atacado com sucesso durante sua defesa, 
+					a mesma será interrompida. Para defender com sucesso, o defensor deverá executar a ação em um tempo correto
+					a partir do momento em que o ataque foi desferido e está em delay. Se executar a ação fora do tempo, perderá 
+					a defesa. A skill "Parry" somada à skill da arma em uso irão definir a janela de tempo de execução. Quanto 
+					maior as skills, maior o tempo. As skills poderão também definir possíveis sequências de ataque e defesa.
+				3) Esquiva: Utiliza a skill "Dodge". Permite esquivar completamente de um único ataque por vez. Se esquivar
+					o atacante soferá uma penalidade aumentando o tempo de recuperação do ataque. A skill de "Dodge" irá definir
+					o tempo em que o defensor ficará sem ação se recuperando da ação e determinará as chances de sucesso.
+			
