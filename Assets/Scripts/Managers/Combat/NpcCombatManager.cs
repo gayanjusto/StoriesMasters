@@ -11,22 +11,22 @@ namespace Assets.Scripts.Managers.Combat
             base.WaitForActionDelay();
         }
         #endregion
-        public override void DisableAttackerActions()
-        {
-            base.DisableAttackerActions();
-            GetComponent<INpcTargetingManager>().Disable();
-        }
+        //public override void DisableAttackerActions()
+        //{
+        //    base.DisableAttackerActions();
+        //    //GetComponent<INpcTargetingManager>().Disable();
+        //}
 
-        public override void DisableAttackerActions(float freezeTime)
-        {
-            base.DisableAttackerActions(freezeTime);
-            GetComponent<INpcTargetingManager>().Disable();
-        }
+        //public override void DisableAttackerActions(float freezeTime)
+        //{
+        //    base.DisableAttackerActions(freezeTime);
+        //    //GetComponent<INpcTargetingManager>().Disable();
+        //}
 
-        public override void EnableAttackerActions()
-        {
-            base.EnableAttackerActions();
-            GetComponent<INpcTargetingManager>().Enable();
-        }
+        //public override void EnableAttackerActions()
+        //{
+        //    base.EnableAttackerActions();
+        //    //GetComponent<INpcTargetingManager>().Enable();
+        //}
     }
 }

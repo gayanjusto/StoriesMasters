@@ -18,6 +18,8 @@ namespace Assets.Scripts.Managers.Combat
 
             _combatController = IoCContainer.GetImplementation<ICombatController>();
             _movementController = IoCContainer.GetImplementation<IMovementController>();
+
+            Disable();
         }
 
         private void Update()

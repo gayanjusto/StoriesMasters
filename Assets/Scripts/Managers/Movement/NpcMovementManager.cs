@@ -15,18 +15,22 @@ namespace Assets.Scripts.Managers.Movement
         void Start()
         {
             agent = GetComponent<NavMeshAgent>();
-            target = GameObject.Find("Player").transform;
+            //target = GameObject.Find("Player").transform;
             //Set navMeshAgentSpeed
             //agent.destination = GameObject.Find("Player").transform.position;//target.position;
         }
 
         void Update()
         {
-            facingDirection = GetFacingDirection();
-            if (GetDistanceFromTarget() > 0.5f)
+            if(target != null)
             {
-                agent.destination = GameObject.Find("Player").transform.position;//target.position;
+                facingDirection = GetFacingDirection();
+                if (GetDistanceFromTarget() > 0.5f)
+                {
+                    agent.destination = GameObject.Find("Player").transform.position;//target.position;
+                }
             }
+          
         }
 
         public DirectionEnum GetFacingDirection()
@@ -101,6 +105,11 @@ namespace Assets.Scripts.Managers.Movement
         public float GetDistanceFromTarget()
         {
             return Vector3.Distance(transform.position, target.position);
+        }
+
+        public void SetTarget(GameObject target)
+        {
+            this.target = target.transform;
         }
     }
 }
