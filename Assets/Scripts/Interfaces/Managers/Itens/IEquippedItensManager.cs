@@ -1,11 +1,12 @@
-﻿using Assets.Scripts.Entities.Itens.Weapons;
+﻿using Assets.Scripts.Entities.Itens.Equippable;
 
 namespace Assets.Scripts.Interfaces.Managers.Itens
 {
     public interface IEquippedItensManager
     {
-        BaseWeaponItem GetEquippedWeapon();
-        void SetEquippedWeapon(BaseWeaponItem equippingWeapon);
+        BaseEquippableItem GetEquippedWeapon();
+        BaseEquippableItem GetDefenseItem();
+        void SetEquippedWeapon(BaseEquippableItem equippingWeapon);
 
     }
 }

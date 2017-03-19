@@ -1,8 +1,8 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.Interfaces.Managers.Inputs;
+using UnityEngine;
 
 namespace Assets.Scripts.Managers.Combat
 {
-
     public class PlayerCombatManager : BaseCombatManager
     {
 
@@ -10,23 +10,8 @@ namespace Assets.Scripts.Managers.Combat
         void Update()
         {
             WaitForActionDelay();
-            WaitForCombatInputDelay();
-        }
-
-        void WaitForActionDelay()
-        {
-            if (_hasCastAction && IsWaitingFreezeTime())
-            {
-                TickTime();
-            }
-            else if(_hasCastAction)
-            {
-                ResetTickTime();
-                _hasCastAction = false;
-                _movementController.EnableMovement(gameObject);
-            }
-
             CheckIfAttackSequenceIsValid();
+            WaitForCombatInputDelay();
         }
 
         //<summary>
@@ -38,7 +23,7 @@ namespace Assets.Scripts.Managers.Combat
             {
                 TickCombatInputTime();
             }
-            else
+            else if(!GetComponent<IPlayerCombatInputManager>().IsEnabled())
             {
                 _combatController.EnableCombatInput(gameObject);
             }
@@ -70,16 +55,16 @@ namespace Assets.Scripts.Managers.Combat
             _hasCastAction = true;
             GetTimeToResetAttackSequence();
 
-            if (_attackSequence == _creature.GetMaximumAttacks())
+            if (_attackSequence == _appObject.GetMaximumAttacks())
             {
-                _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(gameObject, true);
+                _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, true);
                 SetCombatInputTime();
                 ResetAttackSequence();
 
                 return;
             }
 
-            _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(gameObject, false);
+            _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, false);
             SetCombatInputTime();
 
             ++_attackSequence;

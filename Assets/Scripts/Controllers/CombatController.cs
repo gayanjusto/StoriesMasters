@@ -1,8 +1,6 @@
-﻿using System;
-using Assets.Scripts.Constants;
+﻿using Assets.Scripts.Constants;
 using Assets.Scripts.Interfaces.Controllers;
 using Assets.Scripts.Interfaces.Managers.Combat;
-using Assets.Scripts.Managers.Inputs;
 using UnityEngine;
 using Assets.Scripts.Interfaces.Managers.Itens;
 using Assets.Scripts.Enums;
@@ -12,59 +10,27 @@ using Assets.Scripts.Interfaces.Services;
 using Assets.Scripts.IoC;
 using Assets.Scripts.Interfaces.Managers.Movement;
 using Assets.Scripts.Interfaces.Managers.Inputs;
+using Assets.Scripts.Entities.Itens.Equippable;
+using Assets.Scripts.Entities.ApplicationObjects;
 
 namespace Assets.Scripts.Controllers
 {
     public class CombatController : ICombatController
     {
+        private readonly ITargetService _targetService;
+        private readonly ISkillPointService _skillPointService;
+        private readonly IAttackService _attackService;
+        private readonly IAttackTargetService _attackTargetService;
+
+
+        public CombatController()
+        {
+            _attackService = IoCContainer.GetImplementation<IAttackService>();
+            _attackTargetService = IoCContainer.GetImplementation<IAttackTargetService>();
+
+        }
 
         #region PRIVATE METHODS
-        bool StockAttack(GameObject attackingObj)
-        {
-            IAttackTargetService attackTargetService = IoCContainer.GetImplementation<IAttackTargetService>();
-            IAttackService attackService = IoCContainer.GetImplementation<IAttackService>();
-            IMovementManager movementManager = attackingObj.GetComponent<IMovementManager>();
-
-            var target = attackTargetService.GetTargetForStockAttack(attackingObj, movementManager.GetFacingDirection());
-
-            if(target == null)
-            {
-                return false;
-            }
-
-            if(attackService.AttackTarget(attackingObj, target) != null)
-            {
-                MiniStunTarget(target);
-
-                return true;
-            }
-
-            return false;
-        }
-
-        bool SwingAttack(GameObject attackingObj)
-        {
-            IAttackTargetService attackTargetService = IoCContainer.GetImplementation<IAttackTargetService>();
-            IAttackService attackService = IoCContainer.GetImplementation<IAttackService>();
-            IMovementManager movementManager = attackingObj.GetComponent<IMovementManager>();
-
-            var targets = attackTargetService.GetTargetsForSwingAttack(attackingObj, movementManager.GetFacingDirection());
-
-            if (targets == null)
-            {
-                return false;
-            }
-
-            if (attackService.AttackTargets(attackingObj, targets) != null)
-            {
-                MiniStunTargets(targets);
-
-                return true;
-            }
-
-            return false;
-        }
-
 
         //<summary>
         //Prevent aditional input flow
@@ -73,79 +39,67 @@ namespace Assets.Scripts.Controllers
         {
             playerObj.GetComponent<IMovementManager>().Disable();
         }
+
         void EnablePlayerInputMovement(GameObject playerObj)
         {
             playerObj.GetComponent<IMovementManager>().Enable();
         }
-
-        void MiniStunTarget(GameObject target)
-        {
-            ICombatManager targetCombatManager = target.GetComponent<ICombatManager>();
-            targetCombatManager.DisableAttackerActions(2.5f);
-        }
-
-        void MiniStunTargets(GameObject[] targets)
-        {
-            for (int i = 0; i < targets.Length; i++)
-            {
-                MiniStunTarget(targets[i]);
-            }
-        }
         #endregion
 
-        public bool Attack(GameObject attackingObj)
+        public BaseAppObject[] StartAttack(BaseAppObject attackingObj)
         {
-            ICombatManager attackerCombatManager = attackingObj.GetComponent<ICombatManager>();
-            ISkillPointService skillPointService = IoCContainer.GetImplementation<ISkillPointService>();
-            if (attackerCombatManager.CanAttack())
-            {
-                attackerCombatManager.DisableAttackerActions();
-                attackerCombatManager.IncreaseSequenceWaitForAction();
-                bool successfulAttack = AttackByType(attackingObj);
 
-                if (successfulAttack)
-                {
-                    skillPointService.IncreaseCombatSkillPoint(attackingObj);
-                }
+            BaseAppObject[] targets = _attackTargetService.SetTargetsForAttack(attackingObj);
 
-                return successfulAttack;
-                //if attack was successful:
-                //disable target for brief time, while it recovers from attack
-            }
+            attackingObj.CombatManager.SetIsAttacking(true);
 
-            return false;
+            //REFACTOR
+            attackingObj.CombatManager.DisableAttackerActions(GetTimeForAttackDelay(attackingObj)); //<- DelayTime must a method of BaseAppObj
+
+            return targets;
         }
 
-        public bool AttackByType(GameObject attackingObj)
+        public bool Attack(BaseAppObject attackingObj)
         {
-            IEquippedItensManager equippedItensManager = attackingObj.GetComponent<IEquippedItensManager>();
-            
+            bool attackSuccess = _attackService.Attack(attackingObj);
+            attackingObj.CombatManager.SetIsAttacking(false);
 
-            if (equippedItensManager.GetEquippedWeapon() != null)
+            //REFACTOR
+            //Should disable for a longer period if attack has been blocked
+            attackingObj.GameObject.GetComponent<IAttackTiming>().WaitDelayAfterAttack(5.5f);
+
+            return attackSuccess;
+        }
+
+
+        public bool ParryAttack(BaseAppObject parryingObj)
+        {
+            //REFACTOR: must get disable value from obj dexterity calculation
+            parryingObj.CombatManager.DisableAttackerActions(1.0f);
+
+            ITargetService attackTargetService = IoCContainer.GetImplementation<ITargetService>();
+
+            if (parryingObj.EquippedItensManager.GetEquippedWeapon().ItemType == EquippableItemTypeEnum.Weapon)
             {
-                switch (equippedItensManager.GetEquippedWeapon().AttackType)
+                var target = attackTargetService.GetTargetForFacingDirection(parryingObj.GameObject, parryingObj.MovementManager.GetFacingDirection());
+                if (target == null)
                 {
-                    case AttackTypeEnum.Stock:
-                    return StockAttack(attackingObj);
-                    case AttackTypeEnum.Swing:
-                    return SwingAttack(attackingObj);
-                    case AttackTypeEnum.SemiSwing:
-                    //AttackTargetService: get targets surrouding 3 blocks object
-                    //attack target
-                    break;
-                    case AttackTypeEnum.Ranged:
-                    break;
-                    default:
                     return false;
                 }
+
+                ICombatManager targetCombatManager = target.GetComponent<ICombatManager>();
+                if (targetCombatManager.GetIsAttacking())
+                {
+                    parryingObj.CombatManager.SetParryingTarget(target.GetComponent<IObjectManager>().GetBaseAppObject());
+
+                    bool isDefending = parryingObj.DefendAttack(target.GetComponent<IObjectManager>().GetBaseAppObject(), DefenseTypeEnum.Block);
+
+                    parryingObj.CombatManager.SetIsDefending(isDefending);
+
+                    return isDefending;
+                }
             }
-
             return false;
-        }
-
-        public void Defend()
-        {
-
         }
 
         public void DisableCombatInput(GameObject attackingObj)
@@ -164,19 +118,20 @@ namespace Assets.Scripts.Controllers
             }
         }
 
-        public float GetAttackDelayBasedOnEquippedWeapon(GameObject attackingObj, bool isLastAttackSequence)
+        public float GetAttackDelayBasedOnEquippedWeapon(BaseAppObject attackingObj, bool isLastAttackSequence)
         {
-            IEquippedItensManager equippedItensManager = attackingObj.GetComponent<IEquippedItensManager>();
-            IObjectManager objectManager = attackingObj.GetComponent<IObjectManager>();
-
-            BaseCreature entity = objectManager.GetBaseCreature();
 
             if (isLastAttackSequence)
             {
-                return entity.GetTimeToRecoverFromLastAttack(equippedItensManager.GetEquippedWeapon());
+                return attackingObj.GetTimeToRecoverFromLastAttack();
             }
 
-            return entity.GetTimeToRecoverFromAction(equippedItensManager.GetEquippedWeapon());
+            return attackingObj.GetTimeToRecoverFromAction();
+        }
+
+        public float GetTimeForAttackDelay(BaseAppObject attackingObj)
+        {
+            return 5.0f;
         }
     }
 }

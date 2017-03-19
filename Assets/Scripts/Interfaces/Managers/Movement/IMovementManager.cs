@@ -1,5 +1,6 @@
 ﻿
 using Assets.Scripts.Enums;
+using System.Collections.Generic;
 
 namespace Assets.Scripts.Interfaces.Managers.Movement
 {

@@ -25,9 +25,10 @@ namespace Assets.Scripts.IoC
             IoCContainer.Register<IBaseCreatureFactory, BaseCreatureFactory>();
 
             //Services
-            IoCContainer.Register<IMovementSpeedService, MovementSpeedService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IDirectionService, DirectionService>(IoCLifeCycleEnum.Singleton);
+            IoCContainer.Register<IMovementSpeedService, MovementSpeedService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IAttackTargetService, AttackTargetService>(IoCLifeCycleEnum.Singleton);
+            IoCContainer.Register<ITargetService, TargetService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IAttackService, AttackService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<ISkillPointService, SkillPointService>(IoCLifeCycleEnum.Singleton);
 

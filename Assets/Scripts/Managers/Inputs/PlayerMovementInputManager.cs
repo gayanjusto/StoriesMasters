@@ -1,6 +1,9 @@
-﻿using Assets.Scripts.Enums;
+﻿using System;
+using System.Collections.Generic;
+using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Controllers;
 using Assets.Scripts.Interfaces.Managers.Movement;
+using Assets.Scripts.Interfaces.Managers.Objects;
 using Assets.Scripts.Interfaces.Services;
 using Assets.Scripts.IoC;
 using Assets.Scripts.Managers.Movement;
@@ -13,6 +16,7 @@ namespace Assets.Scripts.Managers.Inputs
         private int _hVal;
         private int _vVal;
 
+        private IObjectManager _objectManager;
         private IDirectionService _directionService;
         protected IMovementController _movementController;
 
@@ -26,6 +30,7 @@ namespace Assets.Scripts.Managers.Inputs
 
         private void Start()
         {
+            _objectManager = GetComponent<IObjectManager>();
             _directionService = IoCContainer.GetImplementation<IDirectionService>();
             _movementController = IoCContainer.GetImplementation<IMovementController>();
         }
@@ -33,7 +38,7 @@ namespace Assets.Scripts.Managers.Inputs
         void FixedUpdate()
         {
             _facingDirection = GetFacingDirection();
-            _vVal= CheckUpDownMovement();
+            _vVal = CheckUpDownMovement();
             _hVal = CheckLeftRightMovement();
             CheckRunning();
 
@@ -41,11 +46,11 @@ namespace Assets.Scripts.Managers.Inputs
 
             if (IsMoving())
             {
-                _movementController.SetMovement(_horizontalDirection, _verticalDirection, isRunning, gameObject);
+                _movementController.SetMovement(_horizontalDirection, _verticalDirection, isRunning, _objectManager.GetBaseAppObject());
             }
-            else
+            else if(_objectManager.GetBaseAppObject().StaminaManager.IsEnabled())
             {
-                _movementController.StopMoving(gameObject);
+                _movementController.StopMoving(_objectManager.GetBaseAppObject());
             }
         }
 
@@ -113,7 +118,7 @@ namespace Assets.Scripts.Managers.Inputs
                 _verticalFacingDirection = _verticalDirection;
             }
 
-            if(_hVal != 0 && _vVal == 0)
+            if (_hVal != 0 && _vVal == 0)
             {
                 _horizontalDirection = _directionService.GetHorizontalDirectionByValue(_hVal);
                 _horizontalFacingDirection = _horizontalDirection;
@@ -138,7 +143,12 @@ namespace Assets.Scripts.Managers.Inputs
 
         public DirectionEnum GetFacingDirection()
         {
-            return _directionService.GetFacingDirection(_horizontalFacingDirection, _verticalFacingDirection);
+            if (_directionService != null)
+            {
+                return _directionService.GetFacingDirection(_horizontalFacingDirection, _verticalFacingDirection);
+            }
+
+            return DirectionEnum.None;
         }
     }
 }

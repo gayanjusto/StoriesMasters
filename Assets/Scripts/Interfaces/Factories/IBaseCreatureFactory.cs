@@ -4,6 +4,6 @@ namespace Assets.Scripts.Interfaces.Factories
 {
     public interface IBaseCreatureFactory
     {
-        BaseCreature GetPlainMoveableEntity();
+        BaseCreature GetNewCreature();
     }
 }

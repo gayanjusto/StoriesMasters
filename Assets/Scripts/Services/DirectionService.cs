@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Services;
 using UnityEngine;
@@ -27,7 +28,7 @@ namespace Assets.Scripts.Services
             {
                 int enumValue = i + 1;
                 int offEnumDirectionValues = 9;
-                if(directionValue - (enumValue) <= 0)
+                if (directionValue - (enumValue) <= 0)
                 {
                     directions[i] = (DirectionEnum)offEnumDirectionValues - enumValue;
                     continue;
@@ -39,15 +40,20 @@ namespace Assets.Scripts.Services
             return directions;
         }
 
+        //REFACTOR: Possivelmente está retornando a direção passada + 1 vizinha, e não 2 vizinhas.
+        //Example: If directionValue == 'UP'
+        //It must return UpRight and Right.
         DirectionEnum[] GetTwoNeighboringDirectionWiseClock(int directionValue)
         {
             DirectionEnum[] directions = new DirectionEnum[2];
             for (int i = 0; i < 2; i++)
             {
                 int enumValue = i + 1;
-                int enumDirectionMaxValue = 8;
+                int enumDirectionMaxValue = 8; //Drection = UpLeft
                 int enumDirectionMinValue = 0; //Direction = None
 
+                //Case the value is greater than the maximum it has to 
+                //loop back to 1 (Up)
                 if (directionValue + (enumValue) > enumDirectionMaxValue)
                 {
                     directions[i] = (DirectionEnum)(enumDirectionMinValue) + enumValue;
@@ -55,6 +61,53 @@ namespace Assets.Scripts.Services
                 }
 
                 directions[i] = (DirectionEnum)enumValue;
+            }
+
+            return directions;
+        }
+
+        //Return a direction from each side of the facing one
+        //Example: Facing = Up -> Return UpLeft and UpRight
+        DirectionEnum[] GetNeighborDirections(int directionValue)
+        {
+            DirectionEnum[] directions = new DirectionEnum[2];
+            for (int i = 0; i < 2; i++)
+            {
+                //First iteration = left-side enum
+                if (i == 0)
+                {
+                    int nextEnumValue = directionValue + 1;
+
+                    //Greater than enum max (8 = UpLeft)
+                    if (nextEnumValue > 8)
+                    {
+                        directions[i] = DirectionEnum.Up; //Return direction up
+                        continue;
+                    }
+
+                    //if not the above:
+                    directions[i] = (DirectionEnum)nextEnumValue;
+
+                    continue;
+                }
+
+                //Second iteration = right-side enum
+                if(i == 1)
+                {
+                int previousEnumValue = directionValue - 1;
+
+                    //Less than enum min (0 = None)
+                    if (previousEnumValue <= 0)
+                    {
+                        directions[i] = DirectionEnum.UpLeft; //Return direction UpLeft
+                        continue;
+                    }
+
+                    //if not the above:
+                    directions[i] = (DirectionEnum)previousEnumValue;
+
+                    continue;
+                }
             }
 
             return directions;
@@ -138,16 +191,17 @@ namespace Assets.Scripts.Services
             if (verticalValue == DirectionEnum.Down)
             {
                 return -1;
-            }else
+            }
+            else
             {
                 return 0;
             }
         }
 
-   
+
         public DirectionEnum GetFacingDirection(DirectionEnum horizontalValue, DirectionEnum verticalValue)
         {
-            if(horizontalValue != DirectionEnum.None && verticalValue == DirectionEnum.None)
+            if (horizontalValue != DirectionEnum.None && verticalValue == DirectionEnum.None)
             {
                 return horizontalValue;
             }
@@ -157,7 +211,7 @@ namespace Assets.Scripts.Services
                 return verticalValue;
             }
 
-            if(horizontalValue == DirectionEnum.Right && verticalValue == DirectionEnum.Up)
+            if (horizontalValue == DirectionEnum.Right && verticalValue == DirectionEnum.Up)
             {
                 return DirectionEnum.UpRight;
             }
@@ -202,11 +256,11 @@ namespace Assets.Scripts.Services
             switch (value)
             {
                 case 1:
-                    return DirectionEnum.Right;
+                return DirectionEnum.Right;
                 case -1:
-                    return DirectionEnum.Left;
+                return DirectionEnum.Left;
                 default:
-                    return DirectionEnum.None;
+                return DirectionEnum.None;
             }
         }
 
@@ -215,12 +269,32 @@ namespace Assets.Scripts.Services
             switch (value)
             {
                 case 1:
-                    return DirectionEnum.Up;
+                return DirectionEnum.Up;
                 case -1:
-                    return DirectionEnum.Down;
+                return DirectionEnum.Down;
                 default:
-                    return DirectionEnum.None;
+                return DirectionEnum.None;
             }
+        }
+
+        public DirectionEnum[] GetNeighborDirections(DirectionEnum facingDirection)
+        {
+            return GetNeighborDirections(facingDirection.GetHashCode());
+        }
+
+        public DirectionEnum GetOppositeDirection(DirectionEnum direction)
+        {
+            int directionValue = (int)direction;
+
+            //For 8 enumValues, disregarding 0, the opposite is a total of 4 numbers away
+            int enumOperator = 4;
+            
+            if(directionValue > 4)
+            {
+                return (DirectionEnum)directionValue - enumOperator;
+            }
+
+            return (DirectionEnum)directionValue + enumOperator;
         }
     }
 }

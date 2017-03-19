@@ -6,35 +6,32 @@ using Assets.Scripts.Interfaces.Managers.Attributes;
 using Assets.Scripts.Constants;
 using Assets.Scripts.Managers.Inputs;
 using Assets.Scripts.Interfaces.Managers.Movement;
+using Assets.Scripts.Entities.ApplicationObjects;
+using System;
+using Assets.Scripts.IoC;
 
 namespace Assets.Scripts.Controllers
 {
     public class MovementController : IMovementController
     {
         private readonly IMovementSpeedService _movementSpeedService;
-
+        private readonly IDirectionService _directionService;
 
         public MovementController()
         {
-            _movementSpeedService = IoC.IoCContainer.GetImplementation<IMovementSpeedService>();
+            _directionService = IoCContainer.GetImplementation<IDirectionService>();
+            _movementSpeedService = IoCContainer.GetImplementation<IMovementSpeedService>();
         }
 
-        void DecreaseStamina(GameObject movingObj)
-        {
-            IStaminaManager objStaminaManager = movingObj.GetComponent<IStaminaManager>();
-            if (!objStaminaManager.IsEnabled())
-            {
-                objStaminaManager.Enable();
-            }
+        #region PRIVATE METHODS
+        #endregion
+    
 
-            objStaminaManager.SetDecreasingStamina(true);
-        }
-
-        public void SetMovement(DirectionEnum horizontalValue, DirectionEnum verticalValue, bool isRunning, GameObject movingObj)
+        public void SetMovement(DirectionEnum horizontalValue, DirectionEnum verticalValue, bool isRunning, BaseAppObject movingObj)
         {
             if (isRunning)
             {
-                DecreaseStamina(movingObj);
+                movingObj.DecreaseSteamina();
             }
 
             if (horizontalValue != DirectionEnum.None && verticalValue != DirectionEnum.None)
@@ -57,13 +54,11 @@ namespace Assets.Scripts.Controllers
 
         }
 
-        public void StopMoving(GameObject movingObj)
+        public void StopMoving(BaseAppObject movingObj)
         {
-            IStaminaManager objStaminaManager = movingObj.GetComponent<IStaminaManager>();
-
-            if (objStaminaManager.IsEnabled())
+            if (movingObj.StaminaManager.IsEnabled())
             {
-                objStaminaManager.SetDecreasingStamina(false);
+                movingObj.StaminaManager.SetDecreasingStamina(false);
             }
         }
 
@@ -74,10 +69,20 @@ namespace Assets.Scripts.Controllers
 
         public void EnableMovement(GameObject movingObj)
         {
-            if (movingObj.tag == Tags.PlayerTag)
-            {
                 movingObj.GetComponent<IMovementManager>().Enable();
-            }
+        }
+
+        public DirectionEnum[] GetNeighboringDirections(BaseAppObject movingObj)
+        {
+            DirectionEnum facingDirection = movingObj.MovementManager.GetFacingDirection();
+            DirectionEnum[] directions = new DirectionEnum[3];
+            DirectionEnum[] neighborDirections = _directionService.GetNeighborDirections(facingDirection);
+
+            directions[0] = facingDirection;
+            directions[1] = neighborDirections[0]; //Left Side
+            directions[2] = neighborDirections[1]; //Right Side
+
+            return directions;
         }
     }
 }

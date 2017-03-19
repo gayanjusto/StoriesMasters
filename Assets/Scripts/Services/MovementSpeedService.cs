@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Entities.IntelligentBodies;
+﻿using Assets.Scripts.Entities.ApplicationObjects;
+using Assets.Scripts.Entities.IntelligentBodies;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Factories;
 using Assets.Scripts.Interfaces.Services;
@@ -10,32 +11,25 @@ namespace Assets.Scripts.Services
 {
     public class MovementSpeedService : IMovementSpeedService
     {
-        private readonly BaseCreature _plainMoveableEntity;
 
-        public MovementSpeedService()
+        public void SetHorizontalSpeed(DirectionEnum horizontalValue, BaseAppObject movingObj, bool isRunning)
         {
-            _plainMoveableEntity = IoCContainer.GetImplementation<IBaseCreatureFactory>().GetPlainMoveableEntity();
+            SetStraightLineSpeed(Vector3.right, movingObj.GameObject, GetHorizontalDirectionValue(horizontalValue), isRunning, movingObj.GetStraightLineSpeed);
+        }
+
+        public void SetVerticalSpeed(DirectionEnum verticalValue, BaseAppObject movingObj, bool isRunning)
+        {
+            SetStraightLineSpeed(Vector3.up, movingObj.GameObject, GetVerticalDirectionValue(verticalValue), isRunning, movingObj.GetStraightLineSpeed);
         }
 
 
-        public void SetHorizontalSpeed(DirectionEnum horizontalValue, GameObject movingObj, bool isRunning)
-        {
-            SetStraightLineSpeed(Vector3.right, movingObj, GetHorizontalDirectionValue(horizontalValue), isRunning, _plainMoveableEntity.GetStraightLineSpeed);
-        }
-
-        public void SetVerticalSpeed(DirectionEnum verticalValue, GameObject movingObj, bool isRunning)
-        {
-            SetStraightLineSpeed(Vector3.up, movingObj, GetVerticalDirectionValue(verticalValue), isRunning, _plainMoveableEntity.GetStraightLineSpeed);
-        }
-
-
-        public void SetDiagonalSpeed(DirectionEnum horizontalValue, DirectionEnum verticalValue, GameObject movingObj, bool isRunning)
+        public void SetDiagonalSpeed(DirectionEnum horizontalValue, DirectionEnum verticalValue, BaseAppObject movingObj, bool isRunning)
         {
             //Horizontal
-            SetStraightLineSpeed(Vector3.right, movingObj, GetHorizontalDirectionValue(horizontalValue), isRunning, _plainMoveableEntity.GetDiagionalSpeed);
+            SetStraightLineSpeed(Vector3.right, movingObj.GameObject, GetHorizontalDirectionValue(horizontalValue), isRunning, movingObj.GetDiagionalSpeed);
 
             //Vertical
-            SetStraightLineSpeed(Vector3.up, movingObj, GetVerticalDirectionValue(verticalValue), isRunning, _plainMoveableEntity.GetDiagionalSpeed);
+            SetStraightLineSpeed(Vector3.up, movingObj.GameObject, GetVerticalDirectionValue(verticalValue), isRunning, movingObj.GetDiagionalSpeed);
 
         }
 

@@ -5,9 +5,9 @@ namespace Assets.Scripts.Managers
     public class TickTimeManager : BaseManager
     {
         protected float _maximumTickTime;
-        protected float _currentTickTime;
+        public float _currentTickTime;
         protected float _freezeTickTime;
-        protected bool _hasCastAction;
+        public bool _hasCastAction;
 
         protected void TickTime()
         {

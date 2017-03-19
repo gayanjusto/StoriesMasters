@@ -7,7 +7,13 @@ namespace Assets.Scripts.Entities.Skills.Aggregators
         public CombatSkills()
         {
             SwordsSkill = new SwordsSkill() { Name = "Swords", SkillValue = 100 };
+            ParrySkill = new ParrySkill() { Name = "Parry", SkillValue = 100 };
+            ShieldsSkill = new ShieldsSkill() { Name = "Shields", SkillValue = 100 };
+
         }
         public SwordsSkill SwordsSkill { get; set; }
+        public ParrySkill ParrySkill { get; set; }
+        public ShieldsSkill ShieldsSkill { get; set; }
+
     }
 }

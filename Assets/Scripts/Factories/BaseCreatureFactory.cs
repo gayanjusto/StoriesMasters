@@ -5,7 +5,7 @@ namespace Assets.Scripts.Factories
 {
     public class BaseCreatureFactory : IBaseCreatureFactory
     {
-        public BaseCreature GetPlainMoveableEntity()
+        public BaseCreature GetNewCreature()
         {
             return new BaseCreature();
         }

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Entities.IntelligentBodies;
+﻿using Assets.Scripts.Entities.ApplicationObjects;
+using Assets.Scripts.Entities.IntelligentBodies;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +7,7 @@ namespace Assets.Scripts.Interfaces.Services
 {
     public interface IAttackService
     {
-        BaseCreature AttackTarget(GameObject attackerObj, GameObject targetObj);
-        IList<BaseCreature> AttackTargets(GameObject attackerObj, GameObject[] targetsObjs);
+        bool Attack(BaseAppObject attackingObj);
+        bool TargetIsBlockingAttackerDirections(BaseAppObject attacker, BaseAppObject target);
     }
 }

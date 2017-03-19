@@ -2,8 +2,8 @@
 {
     public class Tags
     {
-        public const string PlayerTag = "Player";
-        public const string Targetable = "Targetable";
+        public const string PlayerTag = "TRGPlayer";
+        public const string Targetable = "TRG";
 
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Enums;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Assets.Scripts.Interfaces.Services
@@ -13,5 +14,19 @@ namespace Assets.Scripts.Interfaces.Services
         DirectionEnum GetFacingDirection(DirectionEnum horizontalValue, DirectionEnum verticalValue);
         DirectionEnum GetHorizontalDirectionByValue(int value);
         DirectionEnum GetVerticalDirectionByValue(int value);
+
+        /// <summary>
+        /// /Returns neighboring direction from each side
+        /// </summary>
+        /// <param name="facingDirection"></param>
+        /// <returns></returns>
+        DirectionEnum[] GetNeighborDirections(DirectionEnum facingDirection);
+     
+        /// <summary>
+        /// Returns the opposite direction of a given one
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        DirectionEnum GetOppositeDirection(DirectionEnum direction);
     }
 }
