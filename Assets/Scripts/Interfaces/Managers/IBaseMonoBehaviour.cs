@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.Interfaces.Managers
 {
-    public interface IBaseManager
+    public interface IBaseMonoBehaviour
     {
         void Enable();
 

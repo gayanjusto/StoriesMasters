@@ -7,12 +7,15 @@ using UnityEngine.AI;
 
 namespace Assets.Scripts.Managers.Movement
 {
-    public class NpcMovementManager : BaseManager, IMovementManager, INpcMovementManager
+    public class NpcMovementManager : BaseMonoBehaviour, IMovementManager, INpcMovementManager
     {
         public Transform target;
         NavMeshAgent agent;
         public DirectionEnum facingDirection;
         float facingAngle;
+
+        bool _canOnlyChangeDirection;
+
         void Start()
         {
             agent = GetComponent<NavMeshAgent>();
@@ -111,6 +114,11 @@ namespace Assets.Scripts.Managers.Movement
         public void SetTarget(GameObject target)
         {
             this.target = target.transform;
+        }
+
+        public void SetCanChangeDirectionButNotMove(bool canOnlyChangeDirection)
+        {
+            _canOnlyChangeDirection = canOnlyChangeDirection;
         }
     }
 }

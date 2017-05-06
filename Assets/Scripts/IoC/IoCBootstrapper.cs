@@ -12,14 +12,11 @@ namespace Assets.Scripts.IoC
     {
         void Awake()
         {
-            //Combat
-            //IoCContainer.Register<IAttackService, AttackService>();
-            //IoCContainer.Register<IProjectileTypeAttack, ProjectileTypeAttack>();
-            //IoCContainer.Register<IStockTypeAttack, StockTypeAttack>();
-            //IoCContainer.Register<ISwingTypeAttack, SwingTypeAttack>();
+            Register();
+        }
 
-
-            //New
+        public static void Register()
+        {
 
             //Factories
             IoCContainer.Register<IBaseCreatureFactory, BaseCreatureFactory>();
@@ -27,13 +24,11 @@ namespace Assets.Scripts.IoC
             //Services
             IoCContainer.Register<IDirectionService, DirectionService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IMovementSpeedService, MovementSpeedService>(IoCLifeCycleEnum.Singleton);
-            IoCContainer.Register<IAttackTargetService, AttackTargetService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<ITargetService, TargetService>(IoCLifeCycleEnum.Singleton);
+            IoCContainer.Register<IAttackTargetService, AttackTargetService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IAttackService, AttackService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<ISkillPointService, SkillPointService>(IoCLifeCycleEnum.Singleton);
-
-
-
+            IoCContainer.Register<IMovementService, MovementService>(IoCLifeCycleEnum.Singleton);
 
             //Controllers
             IoCContainer.Register<IMovementController, MovementController>(IoCLifeCycleEnum.Singleton);

@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Managers.Inputs
 {
-    public class PlayerCombatInputManager : CombatEntryPointManager, IPlayerCombatInputManager, IAttackTiming
+    public class PlayerCombatInputManager : CombatEntryPointManager, /*IPlayerCombatInputManager*/ IAttackTiming
     {
         public float _holdingDefenseInputTime;
         public bool _isHoldingDefenseInput;
@@ -41,7 +41,7 @@ namespace Assets.Scripts.Managers.Inputs
             else if (_hasDelegatedTriggered && _combatManager.CanAttack())
             {
                 Debug.Log("Has finished waiting: " + DateTime.Now);
-                delegatedAction(_objectManager.GetBaseAppObject());
+                //delegatedAction(_objectManager.GetBaseAppObject());
                 _hasDelegatedTriggered = false;
             }
         }
@@ -110,6 +110,21 @@ namespace Assets.Scripts.Managers.Inputs
         {
 
             _combatManager.DisableAttackerActions(delayTime);
+        }
+
+        //void IPlayerCombatInputManager.InitiateAttack()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public bool CanPressAttackKey()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool CheckAttackInput()
+        {
+            throw new NotImplementedException();
         }
     }
 }

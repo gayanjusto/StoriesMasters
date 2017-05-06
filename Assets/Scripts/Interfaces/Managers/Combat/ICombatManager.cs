@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Interfaces.Managers.Combat
 {
-    public interface ICombatManager : IBaseManager
+    public interface ICombatManager : IBaseMonoBehaviour
     {
         int GetAttackSequence();
         void EnableAttackerActions();
@@ -19,10 +19,16 @@ namespace Assets.Scripts.Interfaces.Managers.Combat
         bool GetIsAttacking();
         bool GetIsDefending();
         void SetIsDefending(bool isDefending);
-        bool GetIsBlocking();
+        bool GetIsBlockingWithShield();
         void SetIsBlocking(bool isBlocking);
         void SetParryingTarget(BaseAppObject target);
         BaseAppObject GetParryingTarget();
         DirectionEnum[] GetBlockingDirections();
+
+        void SetHasCastAction(bool hasCastAnAction);
+
+        bool IsAbleToInitiateAttack();
+        void SetAttackReady(bool isAttackReady);
+        bool IsReadyToAttack();
     }
 }

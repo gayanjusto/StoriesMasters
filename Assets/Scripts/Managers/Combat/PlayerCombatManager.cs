@@ -11,23 +11,8 @@ namespace Assets.Scripts.Managers.Combat
         {
             WaitForActionDelay();
             CheckIfAttackSequenceIsValid();
-            WaitForCombatInputDelay();
         }
 
-        //<summary>
-        //Methods used to enable combat input after an action
-        //</summary>
-        void WaitForCombatInputDelay()
-        {
-            if (_combatInputTime > 0)
-            {
-                TickCombatInputTime();
-            }
-            else if(!GetComponent<IPlayerCombatInputManager>().IsEnabled())
-            {
-                _combatController.EnableCombatInput(gameObject);
-            }
-        }
 
         void SetCombatInputTime()
         {
@@ -53,17 +38,24 @@ namespace Assets.Scripts.Managers.Combat
         public override void IncreaseSequenceWaitForAction()
         {
             _hasCastAction = true;
-            GetTimeToResetAttackSequence();
 
+            //REFACTOR: What does this do???
+            base._timeResetAttackSequence = GetTimeToResetAttackSequence();
+
+            //Player has reached the maximum of his attack sequence
             if (_attackSequence == _appObject.GetMaximumAttacks())
             {
+                //Set time to wait after sequence
                 _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, true);
                 SetCombatInputTime();
+
+
                 ResetAttackSequence();
 
                 return;
             }
 
+            //Set time to wait after sequence
             _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, false);
             SetCombatInputTime();
 

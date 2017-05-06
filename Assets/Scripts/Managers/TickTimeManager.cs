@@ -2,7 +2,7 @@
 
 namespace Assets.Scripts.Managers
 {
-    public class TickTimeManager : BaseManager
+    public class TickTimeManager : BaseMonoBehaviour
     {
         protected float _maximumTickTime;
         public float _currentTickTime;

@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.Interfaces.Managers.Combat
 {
-    public interface INpcTargetingManager : IBaseManager
+    public interface INpcTargetingManager : IBaseMonoBehaviour
     {
         void AttackTarget();
     }

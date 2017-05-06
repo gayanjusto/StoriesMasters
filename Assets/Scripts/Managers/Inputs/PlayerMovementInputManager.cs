@@ -8,17 +8,19 @@ using Assets.Scripts.Interfaces.Services;
 using Assets.Scripts.IoC;
 using Assets.Scripts.Managers.Movement;
 using UnityEngine;
+using Assets.Scripts.Interfaces.Managers.Combat;
 
 namespace Assets.Scripts.Managers.Inputs
 {
-    public class PlayerMovementInputManager : BaseManager, IMovementManager
+    public class PlayerMovementInputManager : BaseMonoBehaviour, IMovementManager
     {
         private int _hVal;
         private int _vVal;
 
         private IObjectManager _objectManager;
         private IDirectionService _directionService;
-        protected IMovementController _movementController;
+        private ICombatManager _combatManager;
+        private IMovementService _movementService;
 
         public DirectionEnum _verticalDirection;
         public DirectionEnum _horizontalDirection;
@@ -28,29 +30,38 @@ namespace Assets.Scripts.Managers.Inputs
         public DirectionEnum _facingDirection;
         public bool isRunning;
 
+        public bool _canOnlyChangeDirection;
+
         private void Start()
         {
             _objectManager = GetComponent<IObjectManager>();
+            _combatManager = GetComponent<ICombatManager>();
             _directionService = IoCContainer.GetImplementation<IDirectionService>();
-            _movementController = IoCContainer.GetImplementation<IMovementController>();
+            _movementService = IoCContainer.GetImplementation<IMovementService>();
         }
 
         void FixedUpdate()
         {
             _facingDirection = GetFacingDirection();
+
             _vVal = CheckUpDownMovement();
             _hVal = CheckLeftRightMovement();
             CheckRunning();
 
             SetDirections();
 
-            if (IsMoving())
+            //If is blocking can change direction, but not move
+            if (IsMoving() && !_canOnlyChangeDirection)
             {
-                _movementController.SetMovement(_horizontalDirection, _verticalDirection, isRunning, _objectManager.GetBaseAppObject());
+                _movementService.SetMotion(_horizontalDirection, _verticalDirection, isRunning, _objectManager.GetBaseAppObject());
             }
-            else if(_objectManager.GetBaseAppObject().StaminaManager.IsEnabled())
+            else
             {
-                _movementController.StopMoving(_objectManager.GetBaseAppObject());
+                //If it's not moving, should not lose stamina
+                if (_objectManager.GetBaseAppObject().StaminaManager.IsEnabled())
+                {
+                    _objectManager.GetBaseAppObject().StaminaManager.SetDecreasingStamina(false);
+                }
             }
         }
 
@@ -149,6 +160,11 @@ namespace Assets.Scripts.Managers.Inputs
             }
 
             return DirectionEnum.None;
+        }
+
+        public void SetCanChangeDirectionButNotMove(bool canOnlyChangeDirection)
+        {
+            _canOnlyChangeDirection = canOnlyChangeDirection;
         }
     }
 }

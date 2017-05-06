@@ -45,8 +45,8 @@ namespace Assets.Scripts.Managers.Combat
             {
                 Debug.Log(gameObject.name + " Has finished waiting: " + DateTime.Now);
 
-                delegatedAction(_baseAppObject);
-                _hasDelegatedTriggered = false;
+                //delegatedAction(_baseAppObject);
+                //_hasDelegatedTriggered = false;
             }
 
             //REFACTOR: If has past more than half of the attack delay, should attack and suffer with recovery delay
@@ -55,7 +55,7 @@ namespace Assets.Scripts.Managers.Combat
             {
                 Debug.Log("not close");
                 _hasDelegatedTriggered = false;
-                delegatedAction = null;
+                //delegatedAction = null;
                 _combatManager.EnableAttackerActions();
             }
         }

@@ -4,7 +4,7 @@ using Assets.Scripts.Entities.Itens.Equippable;
 
 namespace Assets.Scripts.Managers.Itens
 {
-    public class EquippedItensManager : BaseManager, IEquippedItensManager
+    public class EquippedItensManager : BaseMonoBehaviour, IEquippedItensManager
     {
         private BaseEquippableItem _equippedWeapon;
         private BaseEquippableItem _defaultWeapon;

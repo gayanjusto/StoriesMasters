@@ -9,7 +9,7 @@ using Assets.Scripts.Factories;
 
 namespace Assets.Scripts.Managers.Objects
 {
-    public class BaseObjectManager : BaseManager
+    public class BaseObjectManager : BaseMonoBehaviour
     {
         public BaseCreature _creature;
         private IBaseCreatureFactory _baseCreatureFactory;

@@ -4,11 +4,18 @@ using Assets.Scripts.Interfaces.Managers.Objects;
 using Assets.Scripts.Interfaces.Services;
 using Assets.Scripts.IoC;
 using System.Linq;
+using System;
 
 namespace Assets.Scripts.Services
 {
     public class AttackTargetService : IAttackTargetService
     {
+        private readonly ITargetService _targetService;
+
+        public AttackTargetService()
+        {
+            _targetService = IoCContainer.GetImplementation<ITargetService>();
+        }
         #region PRIVATE METHODS
         BaseAppObject[] GetTargetsByAttackType(BaseAppObject attackingObj)
         {
@@ -19,10 +26,10 @@ namespace Assets.Scripts.Services
             switch (attackingObj.GetAttackTypeForEquippedWeapon())
             {
                 case AttackTypeEnum.Stock:
-                GetTargetByStockAttack(attackingObj, ref returningTargets);
+                GetTargertFacingDirection(attackingObj, ref returningTargets);
                 break;
                 case AttackTypeEnum.Swing:
-                GetTargetsBySwingAttack(attackingObj, ref returningTargets);//
+                GetTargetsSemiCircleArea(attackingObj, ref returningTargets);//
                 break;
                 case AttackTypeEnum.SemiSwing:
                 //AttackTargetService: get targets surrouding 3 blocks object
@@ -35,11 +42,10 @@ namespace Assets.Scripts.Services
             return returningTargets;
         }
 
-        BaseAppObject[] GetTargetByStockAttack(BaseAppObject attackingObj, ref BaseAppObject[] returningTargets)
+        BaseAppObject[] GetTargertFacingDirection(BaseAppObject attackingObj, ref BaseAppObject[] returningTargets)
         {
-            ITargetService targetService = IoCContainer.GetImplementation<ITargetService>();
 
-            var target = targetService.GetTargetForFacingDirection(attackingObj.GameObject, attackingObj.MovementManager.GetFacingDirection());
+            var target = _targetService.GetTargetForFacingDirection(attackingObj.GameObject, attackingObj.MovementManager.GetFacingDirection());
             if (target != null)
             {
                 returningTargets = new BaseAppObject[1];
@@ -49,7 +55,7 @@ namespace Assets.Scripts.Services
             return returningTargets;
         }
 
-        BaseAppObject[] GetTargetsBySwingAttack(BaseAppObject attackingObj, ref BaseAppObject[] returningTargets)
+        BaseAppObject[] GetTargetsSemiCircleArea(BaseAppObject attackingObj, ref BaseAppObject[] returningTargets)
         {
             ITargetService attackTargetService = IoCContainer.GetImplementation<ITargetService>();
 
@@ -64,19 +70,19 @@ namespace Assets.Scripts.Services
         }
         #endregion
 
-        public BaseAppObject[] SetTargetsForAttack(BaseAppObject attackingObj)
+        public BaseAppObject[] GetTargetsForAttack(BaseAppObject attackingObj)
         {
-            ITargetService targetService = IoCContainer.GetImplementation<ITargetService>();
-            BaseAppObject[] targets = null;
-
-            if (attackingObj.CombatManager.CanAttack())
-            {
-                targets = GetTargetsByAttackType(attackingObj);
-            }
-
-            attackingObj.CombatManager.SetTargets(targets);
+            BaseAppObject[] targets = GetTargetsByAttackType(attackingObj);
 
             return targets;
+        }
+
+        public BaseAppObject GetFacingTarget(BaseAppObject actionObj)
+        {
+            BaseAppObject[] targets = null;
+            GetTargertFacingDirection(actionObj, ref targets);
+
+            return targets.FirstOrDefault();
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Assets.Scripts.Controllers
         public BaseAppObject[] StartAttack(BaseAppObject attackingObj)
         {
 
-            BaseAppObject[] targets = _attackTargetService.SetTargetsForAttack(attackingObj);
+            BaseAppObject[] targets = _attackTargetService.GetTargetsForAttack(attackingObj);
 
             attackingObj.CombatManager.SetIsAttacking(true);
 

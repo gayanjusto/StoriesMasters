@@ -1,6 +1,6 @@
 ﻿namespace Assets.Scripts.Interfaces.Managers.Inputs
 {
-    public interface IPlayerCombatInputManager : IBaseManager
+    public interface IPlayerCombatInputManager : IBaseMonoBehaviour
     {
     }
 }

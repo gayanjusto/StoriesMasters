@@ -4,6 +4,7 @@ namespace Assets.Scripts.Interfaces.Services
 {
     public interface IAttackTargetService
     {
-        BaseAppObject[] SetTargetsForAttack(BaseAppObject attackingObj);
+        BaseAppObject[] GetTargetsForAttack(BaseAppObject attackingObj);
+        BaseAppObject GetFacingTarget(BaseAppObject actionObj);
     }
 }

@@ -25,7 +25,7 @@ namespace Assets.Scripts.Controllers
 
         #region PRIVATE METHODS
         #endregion
-    
+
 
         public void SetMovement(DirectionEnum horizontalValue, DirectionEnum verticalValue, bool isRunning, BaseAppObject movingObj)
         {
@@ -56,10 +56,7 @@ namespace Assets.Scripts.Controllers
 
         public void StopMoving(BaseAppObject movingObj)
         {
-            if (movingObj.StaminaManager.IsEnabled())
-            {
-                movingObj.StaminaManager.SetDecreasingStamina(false);
-            }
+            movingObj.StaminaManager.SetDecreasingStamina(false);
         }
 
         public void DisableMovement(GameObject movingObj)
@@ -69,7 +66,8 @@ namespace Assets.Scripts.Controllers
 
         public void EnableMovement(GameObject movingObj)
         {
-                movingObj.GetComponent<IMovementManager>().Enable();
+            Debug.Log("Habilitou movement manager");
+            movingObj.GetComponent<IMovementManager>().Enable();
         }
 
         public DirectionEnum[] GetNeighboringDirections(BaseAppObject movingObj)

@@ -8,6 +8,9 @@ namespace Assets.Scripts.Interfaces.Services
     public interface IAttackService
     {
         bool Attack(BaseAppObject attackingObj);
-        bool TargetIsBlockingAttackerDirections(BaseAppObject attacker, BaseAppObject target);
+        bool TargetIsBlockingAttackerDirectionsWithShield(BaseAppObject attacker, BaseAppObject target);
+        void MiniStunTarget(BaseAppObject target);
+        void MiniStunTarget(BaseAppObject target, float timeToStun);
+        float GetTimeForAttackDelay(BaseAppObject target);
     }
 }

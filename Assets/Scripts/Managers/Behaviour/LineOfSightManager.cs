@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Managers.Behaviour
 {
-    public class LineOfSightManager : BaseManager, ILineOfSightManager
+    public class LineOfSightManager : BaseMonoBehaviour, ILineOfSightManager
     {
         INpcTargetingManager _npcTargetingManager;
         INpcMovementManager _npcMovementManager;

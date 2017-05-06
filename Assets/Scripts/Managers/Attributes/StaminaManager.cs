@@ -10,9 +10,9 @@ namespace Assets.Scripts.Managers.Attributes
 
         public BaseCreature _moveableEntity;
 
-        public void SetDecreasingStamina(bool value)
+        public void SetDecreasingStamina(bool decreasingStamina)
         {
-            _decreasingStamina = value;
+            _decreasingStamina = decreasingStamina;
         }
 
         public bool GetDecreasingStamina()

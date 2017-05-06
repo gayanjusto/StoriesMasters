@@ -58,32 +58,26 @@ namespace Assets.Scripts.Services
         bool AttackByType(BaseAppObject attackingObj, BaseAppObject[] targets)
         {
 
-            if (attackingObj.EquippedItensManager.GetEquippedWeapon() != null)
+            switch (attackingObj.GetAttackTypeForEquippedWeapon())
             {
-                switch (attackingObj.GetAttackTypeForEquippedWeapon())
-                {
-                    case AttackTypeEnum.Stock:
-                    return StockAttack(attackingObj, targets[0]);
-                    case AttackTypeEnum.Swing:
-                    return SwingAttack(attackingObj, targets);
-                    case AttackTypeEnum.SemiSwing:
-                    //AttackTargetService: get targets surrouding 3 blocks object
-                    //attack target
-                    break;
-                    case AttackTypeEnum.Ranged:
-                    break;
-                    default:
-                    return false;
-                }
+                case AttackTypeEnum.Stock:
+                return StockAttack(attackingObj, targets[0]);
+                case AttackTypeEnum.Swing:
+                return SwingAttack(attackingObj, targets);
+                case AttackTypeEnum.SemiSwing:
+                //AttackTargetService: get targets surrouding 3 blocks object
+                //attack target
+                break;
+                case AttackTypeEnum.Ranged:
+                break;
+                default:
+                return false;
             }
 
             return false;
         }
 
-        void MiniStunTarget(BaseAppObject target)
-        {
-            target.CombatManager.DisableAttackerActions(2.5f);
-        }
+
 
         void MiniStunTargets(BaseAppObject[] targets)
         {
@@ -96,6 +90,7 @@ namespace Assets.Scripts.Services
         BaseAppObject AttackTarget(BaseAppObject attackerObj, BaseAppObject target)
         {
 
+            //Calculate chances of hitting target or if target has already blocked this attacker
             if (attackerObj.CanAttackTarget(target))
             {
                 var equippedWeapon = attackerObj.EquippedItensManager.GetEquippedWeapon();
@@ -121,6 +116,7 @@ namespace Assets.Scripts.Services
             for (int i = 0; i < targetsObjs.Length; i++)
             {
 
+                //Calculate chances of hitting target or if target has already blocked this attacker
                 if (!attackerObj.CanAttackTarget(targetsObjs[i]))
                 {
                     break; //If target has simply dodged, it should continue the attack to the next target
@@ -136,6 +132,8 @@ namespace Assets.Scripts.Services
                 creaturesHit.Add(targetsObjs[i]);
             }
 
+            //After a target being attacked, it should disable his parry defense
+            //for it's no longer necessary
             for (int i = 0; i < targetsObjs.Length; i++)
             {
                 DisableParryDefense(targetsObjs[i]);
@@ -147,33 +145,73 @@ namespace Assets.Scripts.Services
         void DisableParryDefense(BaseAppObject defender)
         {
             defender.CombatManager.SetIsDefending(false);
+            defender.CombatManager.SetHasCastAction(false);
             defender.CombatManager.SetParryingTarget(null);
         }
 
+        bool CanAttackTarget(BaseAppObject target, BaseAppObject attacker)
+        {
+            //Target has already defended the attack from this attacker
+            if (target.CombatManager.GetIsDefending() && target.CombatManager.GetParryingTarget() == attacker)
+            {
+                Debug.Log("Blocked attack with parry");
+
+                return false;
+            }
+
+            //If is attacking a target that is parrying a different attacker, then this attacker will have
+            //an instant success.
+            if (target.CombatManager.GetIsDefending() && target.CombatManager.GetParryingTarget() != attacker)
+            {
+                Debug.Log(target.GameObject.name + " foi atacado por outro objeto e perdeu a defesa");
+                return true;
+            }
+
+            //Target is trying to block with a shield
+            if (target.CombatManager.GetIsBlockingWithShield())
+            {
+                MiniStunTarget(target);
+
+                if (TargetIsBlockingAttackerDirectionsWithShield(attacker, target))
+                {
+                    Debug.Log(target.GameObject.name + " is trying to block with shield");
+                    return target.DefendAttack(attacker, DefenseTypeEnum.Block);
+                }
+                else //Target is not blocking attacker direction resulting in Instant hit
+                {
+                    return true;
+                }
+            }
+
+            //return: Int + Dex + Skill + Rand 100 X enemie's
+            return true;
+        }
         #endregion
 
         public bool Attack(BaseAppObject attackingObj)
         {
             var attackerTargets = attackingObj.CombatManager.GetTargets();
-            if (attackingObj.CombatManager.CanAttack() && attackerTargets != null)
+
+            //Can attack is already checked by input
+            //Can attack even without targets
+            //if (attackingObj.CombatManager.CanAttack() && attackerTargets != null)
+            //{
+
+            //Increase attack sequence
+            attackingObj.CombatManager.IncreaseSequenceWaitForAction();
+
+            bool successfulAttack = AttackByType(attackingObj, attackerTargets);
+
+            if (successfulAttack)
             {
-              //REFACTOR: actions should be disabled even if there are no targets. Move to combat controller
-                attackingObj.CombatManager.DisableAttackerActions();
-                attackingObj.CombatManager.IncreaseSequenceWaitForAction();
-                bool successfulAttack = AttackByType(attackingObj, attackerTargets);
-
-                if (successfulAttack)
-                {
-                    attackingObj.IncreaseCombatSkillPoint();
-                }
-
-                return successfulAttack;
+                attackingObj.IncreaseCombatSkillPoint();
             }
 
-            return false;
+            return successfulAttack;
+            //}
         }
 
-        public bool TargetIsBlockingAttackerDirections(BaseAppObject attacker, BaseAppObject target)
+        public bool TargetIsBlockingAttackerDirectionsWithShield(BaseAppObject attacker, BaseAppObject target)
         {
             IMovementController movementController = IoCContainer.GetImplementation<IMovementController>();
             IDirectionService directionService = IoCContainer.GetImplementation<IDirectionService>();
@@ -183,13 +221,29 @@ namespace Assets.Scripts.Services
 
             for (int i = 0; i < targetBlockingDirections.Length; i++)
             {
-                if(targetBlockingDirections[i] == directionService.GetOppositeDirection(attackerFacingDirection))
+                if (targetBlockingDirections[i] == directionService.GetOppositeDirection(attackerFacingDirection))
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        public void MiniStunTarget(BaseAppObject target)
+        {
+            target.CombatManager.DisableAttackerActions(2.5f);
+        }
+
+        public void MiniStunTarget(BaseAppObject target, float timeToStun)
+        {
+            target.CombatManager.DisableAttackerActions(timeToStun);
+        }
+
+        public float GetTimeForAttackDelay(BaseAppObject target)
+        {
+            //ToDo: Calculate time based on skills / equipment / weight
+            return 5.0f;
         }
     }
 }

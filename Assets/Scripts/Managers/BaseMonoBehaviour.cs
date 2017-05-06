@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Assets.Scripts.Managers
 {
-    public class BaseManager : MonoBehaviour, IBaseManager
+    public class BaseMonoBehaviour : MonoBehaviour, IBaseMonoBehaviour
     {
         public void Enable()
         {

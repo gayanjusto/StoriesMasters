@@ -174,6 +174,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
         {
             BaseCombatSkill defenderCombatSkill = null;
 
+            //Is blocking with shield
             if (defenseType == DefenseTypeEnum.Block)
             {
                 EquippableItemTypeEnum defenderWeaponType = EquippedItensManager.GetEquippedWeapon().ItemType;
@@ -201,7 +202,9 @@ namespace Assets.Scripts.Entities.ApplicationObjects
                 Debug.Log("Blocked attack with parry");
 
                 return false;
-            }//If is attacking a target that is parrying, but not this attacker, then it can instantly attack.
+            }
+            //If is attacking a target that is parrying a different attacker, then this attacker will have
+            //an instant success.
             else if (target.CombatManager.GetIsDefending() && target.CombatManager.GetParryingTarget() != this)
             {
                 Debug.Log(target.GameObject.name + " foi atacado por outro objeto e perdeu a defesa");
@@ -209,9 +212,11 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             }
 
             //Target is trying to block with a shield
-            if (target.CombatManager.GetIsBlocking())
+            if (target.CombatManager.GetIsBlockingWithShield())
             {
-                if (AttackService.TargetIsBlockingAttackerDirections(this, target))
+                AttackService.MiniStunTarget(target);
+
+                if (AttackService.TargetIsBlockingAttackerDirectionsWithShield(this, target))
                 {
                     Debug.Log(target.GameObject.name + " is trying to block with shield");
                     return target.DefendAttack(this, DefenseTypeEnum.Block);
