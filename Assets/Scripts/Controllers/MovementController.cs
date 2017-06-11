@@ -72,15 +72,7 @@ namespace Assets.Scripts.Controllers
 
         public DirectionEnum[] GetNeighboringDirections(BaseAppObject movingObj)
         {
-            DirectionEnum facingDirection = movingObj.MovementManager.GetFacingDirection();
-            DirectionEnum[] directions = new DirectionEnum[3];
-            DirectionEnum[] neighborDirections = _directionService.GetNeighborDirections(facingDirection);
-
-            directions[0] = facingDirection;
-            directions[1] = neighborDirections[0]; //Left Side
-            directions[2] = neighborDirections[1]; //Right Side
-
-            return directions;
+            throw new NotImplementedException();
         }
     }
 }

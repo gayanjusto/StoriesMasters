@@ -3,6 +3,7 @@ using Assets.Scripts.Entities.IntelligentBodies;
 using Assets.Scripts.Interfaces.Managers.Attributes;
 using Assets.Scripts.Interfaces.Managers.Behaviour;
 using Assets.Scripts.Interfaces.Managers.Combat;
+using Assets.Scripts.Interfaces.Managers.Components;
 using Assets.Scripts.Interfaces.Managers.Itens;
 using Assets.Scripts.Interfaces.Managers.Movement;
 using Assets.Scripts.Interfaces.Managers.Objects;
@@ -20,6 +21,7 @@ namespace Assets.Scripts.Factories
             IMovementManager movementManager = gameObject.GetComponent<IMovementManager>();
             IObjectManager objectManager = gameObject.GetComponent<IObjectManager>();
             ILineOfSightManager lineOfSightManager = gameObject.GetComponent<ILineOfSightManager>();
+            IComponentsManager componentsManager = gameObject.GetComponent<IComponentsManager>();
 
             NpcAppObject npcAppObj = new NpcAppObject(
                 gameObject,
@@ -30,7 +32,8 @@ namespace Assets.Scripts.Factories
                 equippedItensManager,
                 movementManager,
                 objectManager,
-                lineOfSightManager);
+                lineOfSightManager,
+                componentsManager);
 
             return npcAppObj;
         }

@@ -11,8 +11,12 @@ namespace Assets.Scripts.Entities.Itens.Equippable
         public int Damage { get; set; }
         public double Weight { get; set; }
         public float WeaponRange { get; set; }
-        public AttackTypeEnum AttackType { get; set; }
+        public AttackTypeEnum[] AttacksType{ get; set; }
         public string SkillUsed { get; set; }
         public EquippableItemTypeEnum ItemType { get; set; }
+
+        public AttackTypeEnum CurrentAttackType { get; set; }
+
+       
     }
 }

@@ -1,4 +1,5 @@
-﻿using Assets.Scripts.Enums;
+﻿using Assets.Scripts.Entities.ApplicationObjects;
+using Assets.Scripts.Enums;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ namespace Assets.Scripts.Interfaces.Services
         /// </summary>
         /// <param name="facingDirection"></param>
         /// <returns></returns>
-        DirectionEnum[] GetNeighborDirections(DirectionEnum facingDirection);
+        DirectionEnum[] GetNeighborDirections(BaseAppObject movingObj);
      
         /// <summary>
         /// Returns the opposite direction of a given one

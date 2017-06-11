@@ -1,0 +1,14 @@
+﻿[
+  {
+    "ObjectId": 1,
+    "Name": "Long Sword",
+    "Description": "A longsword",
+    "Duration": 100,
+    "Damage": 10,
+    "Weight": 3,
+    "WeaponRange": 1,
+    "SkillUsed": "Swords",
+    "ItemType": "Weapon",
+    "AttacksTypes": [ "Stock", "Swing" ]
+  }
+]

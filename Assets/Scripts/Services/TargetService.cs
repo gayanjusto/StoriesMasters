@@ -11,7 +11,7 @@ namespace Assets.Scripts.Services
     public class TargetService : ITargetService
     {
         private readonly IDirectionService _directionService;
-        private const float targetStockSphereRadius = .0025f;
+        private const float targetStockSphereRadius = 1.0f;
         private const float targetArchRadius = .1f;
         private const float targetSemiCircleRadius = .2f;
 
@@ -47,7 +47,7 @@ namespace Assets.Scripts.Services
             int layerMask = 1 << collisionObjsLayerId;
 
             Collider[] targets = Physics.OverlapSphere(targetingPosition, targetStockSphereRadius, layerMask)
-                .Where(x => x.gameObject != attackingObj && x.tag.StartsWith(Tags.Targetable) ).ToArray();
+                .Where(x => x.gameObject != attackingObj && x.tag.StartsWith(Tags.Targetable) && !x.tag.Equals(attackingObj.tag) ).ToArray();
             if(targets == null || targets.Length == 0)
             {
                 return null;

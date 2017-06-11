@@ -23,25 +23,22 @@ namespace Assets.Scripts.Managers.Combat
             _objectManager = GetComponent<IObjectManager>();
             _npcMovementManager = GetComponent<INpcMovementManager>();
             _combatManager = GetComponent<ICombatManager>();
-
             _baseAppObject = _objectManager.GetBaseAppObject();
 
 
-            _combatController = IoCContainer.GetImplementation<ICombatController>();
             _movementController = IoCContainer.GetImplementation<IMovementController>();
 
-            Debug.Log("Teste");
-
+            base.SetBaseDependencies();
             Disable();
         }
 
         private void Update()
         {
-            if (IsCloseToTarget() && _baseAppObject.CombatManager.CanAttack() && !_hasDelegatedTriggered)
+            if (IsCloseToTarget() && _baseAppObject.CombatManager.CanAttack())
             {
                 AttackTarget();
             }
-            else if (_hasDelegatedTriggered && _baseAppObject.CombatManager.CanAttack() && IsCloseToTarget())
+            else if (_baseAppObject.CombatManager.CanAttack() && IsCloseToTarget())
             {
                 Debug.Log(gameObject.name + " Has finished waiting: " + DateTime.Now);
 
@@ -51,33 +48,24 @@ namespace Assets.Scripts.Managers.Combat
 
             //REFACTOR: If has past more than half of the attack delay, should attack and suffer with recovery delay
             //Target has moved away -> Cancel attack
-            if(_hasDelegatedTriggered && !IsCloseToTarget())
+            if(!IsCloseToTarget() && !_attackService.AttackIsPastHalfWay(_baseAppObject))
             {
-                Debug.Log("not close");
-                _hasDelegatedTriggered = false;
-                //delegatedAction = null;
+                //Debug.Log("not close");
                 _combatManager.EnableAttackerActions();
             }
         }
     
         bool IsCloseToTarget()
         {
+
             return _npcMovementManager.GetDistanceFromTarget() <= _baseAppObject.EquippedItensManager.GetEquippedWeapon().WeaponRange;
         }
+
         #endregion
 
         public void AttackTarget()
         {
             base.InitiateAttack();
-        }
-
-        public void WaitDelayAfterAttack(float delayTime)
-        {
-            //REFACTOR
-            //Should disable for a longer period if attack has been blocked
-            _combatManager.DisableAttackerActions(delayTime);
-
-            Debug.Log(gameObject.name + "Is waiting delay after attack");
         }
     }
 }

@@ -5,12 +5,12 @@ namespace Assets.Scripts.Managers
 {
     public class BaseMonoBehaviour : MonoBehaviour, IBaseMonoBehaviour
     {
-        public void Enable()
+        public virtual void Enable()
         {
             enabled = true;
         }
 
-        public void Disable()
+        public virtual void Disable()
         {
             enabled = false;
         }

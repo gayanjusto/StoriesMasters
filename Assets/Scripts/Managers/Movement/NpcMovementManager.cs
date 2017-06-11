@@ -11,11 +11,11 @@ namespace Assets.Scripts.Managers.Movement
     {
         public Transform target;
         NavMeshAgent agent;
-        public DirectionEnum facingDirection;
         float facingAngle;
 
         bool _canOnlyChangeDirection;
 
+        #region PRIVATE METHODS
         void Start()
         {
             agent = GetComponent<NavMeshAgent>();
@@ -26,17 +26,26 @@ namespace Assets.Scripts.Managers.Movement
 
         void Update()
         {
-            if(target != null)
+            if(TargetIsAvailable())
             {
-                facingDirection = GetFacingDirection();
+                //facingDirection = GetFacingDirection();
                 if (GetDistanceFromTarget() > 0.5f)
                 {
-                    agent.destination = GameObject.Find("Player").transform.position;//target.position;
+                    agent.destination = target.position;
                 }
+            }
+            else
+            {
+                Disable();
             }
           
         }
 
+        bool TargetIsAvailable()
+        {
+            return target != null && target.gameObject.activeSelf;
+        }
+        #endregion
         public DirectionEnum GetFacingDirection()
         {
             facingAngle = transform.localEulerAngles.y;

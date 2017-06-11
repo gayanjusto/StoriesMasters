@@ -1,10 +1,12 @@
 ﻿namespace Assets.Scripts.Enums
 {
+    //Ordered by quickiest to strongest
     public enum AttackTypeEnum
     {
         Stock= 1,
-        Swing = 2,
-        SemiSwing = 3,
-        Ranged = 4
+        SemiSwing = 2,
+        Swing = 3,
+        QuickRanged = 4,
+        LongRanged = 5
     }
 }

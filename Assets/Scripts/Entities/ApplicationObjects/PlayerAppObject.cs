@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Entities.IntelligentBodies;
 using Assets.Scripts.Interfaces.Managers.Attributes;
 using Assets.Scripts.Interfaces.Managers.Combat;
+using Assets.Scripts.Interfaces.Managers.Components;
 using Assets.Scripts.Interfaces.Managers.Inputs;
 using Assets.Scripts.Interfaces.Managers.Itens;
 using Assets.Scripts.Interfaces.Managers.Movement;
@@ -21,7 +22,8 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             IEquippedItensManager equippedItensManager,
             IMovementManager movementManager,
             IObjectManager objectManager,
-            IPlayerCombatInputManager playerCombatInputManager) : base
+            IPlayerCombatInputManager playerCombatInputManager,
+            IComponentsManager componentsManager) : base
             (
                 gameObject,
                 transform,
@@ -30,7 +32,8 @@ namespace Assets.Scripts.Entities.ApplicationObjects
                 combatManager,
                 equippedItensManager,
                 movementManager,
-                objectManager
+                objectManager,
+                componentsManager
                 )
         {
             PlayerCombatInputManager = playerCombatInputManager;

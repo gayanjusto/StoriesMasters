@@ -5,6 +5,7 @@ using Assets.Scripts.Interfaces.Services;
 using Assets.Scripts.IoC;
 using System.Linq;
 using System;
+using Assets.Scripts.Interfaces.Managers.Movement;
 
 namespace Assets.Scripts.Services
 {
@@ -35,7 +36,7 @@ namespace Assets.Scripts.Services
                 //AttackTargetService: get targets surrouding 3 blocks object
                 //attack target
                 break;
-                case AttackTypeEnum.Ranged:
+                case AttackTypeEnum.QuickRanged:
                 break;
             }
 
@@ -45,7 +46,7 @@ namespace Assets.Scripts.Services
         BaseAppObject[] GetTargertFacingDirection(BaseAppObject attackingObj, ref BaseAppObject[] returningTargets)
         {
 
-            var target = _targetService.GetTargetForFacingDirection(attackingObj.GameObject, attackingObj.MovementManager.GetFacingDirection());
+            var target = _targetService.GetTargetForFacingDirection(attackingObj.GameObject, attackingObj.GetFacingDirection());
             if (target != null)
             {
                 returningTargets = new BaseAppObject[1];
@@ -59,7 +60,7 @@ namespace Assets.Scripts.Services
         {
             ITargetService attackTargetService = IoCContainer.GetImplementation<ITargetService>();
 
-            var targets = attackTargetService.GetTargetsForSemiCircle(attackingObj.GameObject, attackingObj.MovementManager.GetFacingDirection());
+            var targets = attackTargetService.GetTargetsForSemiCircle(attackingObj.GameObject, attackingObj.GetFacingDirection());
             if (targets != null && targets.Length > 0)
             {
                 returningTargets = new BaseAppObject[targets.Length];
@@ -82,6 +83,10 @@ namespace Assets.Scripts.Services
             BaseAppObject[] targets = null;
             GetTargertFacingDirection(actionObj, ref targets);
 
+            if(targets == null)
+            {
+                return null;
+            }
             return targets.FirstOrDefault();
         }
     }

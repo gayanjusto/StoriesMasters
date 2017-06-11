@@ -2,5 +2,6 @@
 {
     public interface IPlayerCombatInputManager : IBaseMonoBehaviour
     {
+        void Reset();
     }
 }

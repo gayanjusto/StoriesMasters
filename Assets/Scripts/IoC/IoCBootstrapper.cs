@@ -15,6 +15,7 @@ namespace Assets.Scripts.IoC
             Register();
         }
 
+        //Order should be from implementations with less dependencies to ones with most dependencies
         public static void Register()
         {
 
@@ -26,13 +27,17 @@ namespace Assets.Scripts.IoC
             IoCContainer.Register<IMovementSpeedService, MovementSpeedService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<ITargetService, TargetService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IAttackTargetService, AttackTargetService>(IoCLifeCycleEnum.Singleton);
+            IoCContainer.Register<IAttackTypeService, AttackTypeService>(IoCLifeCycleEnum.Singleton);
+            
+            IoCContainer.Register<ICombatVisualInformationService, CombatVisualInformationService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IAttackService, AttackService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<ISkillPointService, SkillPointService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IMovementService, MovementService>(IoCLifeCycleEnum.Singleton);
+            IoCContainer.Register<IObjectPoolingService, ObjectPoolingService>(IoCLifeCycleEnum.Singleton);
 
+            
             //Controllers
             IoCContainer.Register<IMovementController, MovementController>(IoCLifeCycleEnum.Singleton);
-            IoCContainer.Register<ICombatController, CombatController>(IoCLifeCycleEnum.Singleton);
         }
     }
 }

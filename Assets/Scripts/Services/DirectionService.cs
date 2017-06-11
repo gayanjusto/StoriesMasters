@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Services;
 using UnityEngine;
+using Assets.Scripts.Entities.ApplicationObjects;
 
 namespace Assets.Scripts.Services
 {
@@ -277,9 +278,18 @@ namespace Assets.Scripts.Services
             }
         }
 
-        public DirectionEnum[] GetNeighborDirections(DirectionEnum facingDirection)
+        public DirectionEnum[] GetNeighborDirections(BaseAppObject movingObj)
         {
-            return GetNeighborDirections(facingDirection.GetHashCode());
+            DirectionEnum facingDirection = movingObj.GetFacingDirection();
+            DirectionEnum[] directions = new DirectionEnum[3];
+
+            DirectionEnum[] neighborDirections = GetNeighborDirections(facingDirection.GetHashCode());
+
+            directions[0] = facingDirection;
+            directions[1] = neighborDirections[0]; //Left Side
+            directions[2] = neighborDirections[1]; //Right Side
+
+            return directions;
         }
 
         public DirectionEnum GetOppositeDirection(DirectionEnum direction)

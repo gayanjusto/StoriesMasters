@@ -10,15 +10,13 @@ namespace Assets.Scripts.Interfaces.Managers.Combat
         void EnableAttackerActions();
         void DisableAttackerActions();
         void DisableAttackerActions(float freezeTime);
-        void IncreaseSequenceWaitForAction();
         bool CanAttack();
         bool GetHasCastAction();
         void SetTargets(BaseAppObject[] targets);
         BaseAppObject[] GetTargets();
         void SetIsAttacking(bool isAttacking);
         bool GetIsAttacking();
-        bool GetIsDefending();
-        void SetIsDefending(bool isDefending);
+        bool GetIsAttemptingToParry();
         bool GetIsBlockingWithShield();
         void SetIsBlocking(bool isBlocking);
         void SetParryingTarget(BaseAppObject target);
@@ -30,5 +28,8 @@ namespace Assets.Scripts.Interfaces.Managers.Combat
         bool IsAbleToInitiateAttack();
         void SetAttackReady(bool isAttackReady);
         bool IsReadyToAttack();
+        float GetCurrentTimeForAttackDelay();
+        float GetTotalFreezeTime();
+        void SetIsAttemptingToParryAttack(bool isAttemptingToParry);
     }
 }

@@ -14,8 +14,8 @@ public class AnimationManager : MonoBehaviour {
 
     Animator[] _bodyAnimators;
 
-    IMovementManager _movementManager;
-    DirectionEnum _facingDirection;
+    IFacingDirection _facingDirection;
+    DirectionEnum _currentFacingDirection;
 
     int upHash = Animator.StringToHash("Up");
     int downHash = Animator.StringToHash("Down");
@@ -47,54 +47,54 @@ public class AnimationManager : MonoBehaviour {
         _rightLegAnimatorController = _characterSprites.Find("RightLeg").GetComponent<Animator>();
         _bodyAnimators[5] = _rightLegAnimatorController;
 
-        _movementManager = GetComponent<IMovementManager>();
+        _facingDirection = GetComponent<IFacingDirection>();
 
 
     }
 
     private void Update()
     {
-        _facingDirection = _movementManager.GetFacingDirection();
+        _currentFacingDirection = _facingDirection.GetFacingDirection();
 
-        if(_facingDirection == DirectionEnum.Up)
+        if(_currentFacingDirection == DirectionEnum.Up)
         {
             SetAnimationBoolDirection(upHash, true);
             return;
         }
-        if (_facingDirection == DirectionEnum.Down)
+        if (_currentFacingDirection == DirectionEnum.Down)
         {
             SetAnimationBoolDirection(downHash, true);
             return;
         }
-        if (_facingDirection == DirectionEnum.Left)
+        if (_currentFacingDirection == DirectionEnum.Left)
         {
             SetAnimationBoolDirection(leftHash, true);
             return;
         }
-        if (_facingDirection == DirectionEnum.Right)
+        if (_currentFacingDirection == DirectionEnum.Right)
         {
             SetAnimationBoolDirection(rightHash, true);
             return;
         }
-        if (_facingDirection == DirectionEnum.UpLeft)
+        if (_currentFacingDirection == DirectionEnum.UpLeft)
         {
             SetAnimationBoolDirection(upHash, true);
             SetAnimationBoolDirection(leftHash, true);
             return;
         }
-        if (_facingDirection == DirectionEnum.UpRight)
+        if (_currentFacingDirection == DirectionEnum.UpRight)
         {
             SetAnimationBoolDirection(upHash, true);
             SetAnimationBoolDirection(rightHash, true);
             return;
         }
-        if (_facingDirection == DirectionEnum.DownLeft)
+        if (_currentFacingDirection == DirectionEnum.DownLeft)
         {
             SetAnimationBoolDirection(downHash, true);
             SetAnimationBoolDirection(leftHash, true);
             return;
         }
-        if (_facingDirection == DirectionEnum.DownRight)
+        if (_currentFacingDirection == DirectionEnum.DownRight)
         {
             SetAnimationBoolDirection(downHash, true);
             SetAnimationBoolDirection(rightHash, true);

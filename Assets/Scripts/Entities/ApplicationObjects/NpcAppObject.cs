@@ -2,6 +2,7 @@
 using Assets.Scripts.Interfaces.Managers.Attributes;
 using Assets.Scripts.Interfaces.Managers.Behaviour;
 using Assets.Scripts.Interfaces.Managers.Combat;
+using Assets.Scripts.Interfaces.Managers.Components;
 using Assets.Scripts.Interfaces.Managers.Itens;
 using Assets.Scripts.Interfaces.Managers.Movement;
 using Assets.Scripts.Interfaces.Managers.Objects;
@@ -23,7 +24,8 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             IEquippedItensManager equippedItensManager,
             IMovementManager movementManager,
             IObjectManager objectManager,
-            ILineOfSightManager lineOfSightManager) : base 
+            ILineOfSightManager lineOfSightManager,
+            IComponentsManager componentsManager) : base 
             (
                 gameObject,
                 transform,
@@ -32,7 +34,8 @@ namespace Assets.Scripts.Entities.ApplicationObjects
                 combatManager,
                 equippedItensManager,
                 movementManager,
-                objectManager
+                objectManager,
+                componentsManager
                 )
         {
             LineOfSightManager = lineOfSightManager;

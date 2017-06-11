@@ -11,6 +11,8 @@ using Assets.Scripts.Interfaces.Managers.Objects;
 using Assets.Scripts.Interfaces.Services;
 using Assets.Scripts.IoC;
 using UnityEngine;
+using System.Linq;
+using Assets.Scripts.Interfaces.Managers.Components;
 
 namespace Assets.Scripts.Entities.ApplicationObjects
 {
@@ -26,7 +28,8 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             ICombatManager combatManager,
             IEquippedItensManager equippedItensManager,
             IMovementManager movementManager,
-            IObjectManager objectManager)
+            IObjectManager objectManager,
+            IComponentsManager componentsManager)
         {
             GameObject = gameObject;
             Transform = transform;
@@ -37,13 +40,14 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             EquippedItensManager = equippedItensManager;
             MovementManager = movementManager;
             ObjectManager = objectManager;
-
+            ComponentsManager = componentsManager;
             AttackService = IoCContainer.GetImplementation<IAttackService>();
         }
 
+      
 
         private float defaultSpeedValue = 1.5f;
-        private float defaultRunningCoefficient = 1.5f;
+        private float defaultRunningValue = 1.5f;
         private float defaultDiagonalSpeedDivisor = 2.4f;
 
         public string ObjectId { get; set; }
@@ -60,14 +64,22 @@ namespace Assets.Scripts.Entities.ApplicationObjects
         public IMovementManager MovementManager { get; set; }
         public IObjectManager ObjectManager { get; set; }
         public IAttackService AttackService { get; set; }
+        public IObjectPoolingService ObjectPoolingService { get; set; }
+        public IComponentsManager ComponentsManager { get; set; }
+
+        //Determines whether object can make any action or not
+        public bool HasActionsPrevented { get; set; }
 
         public AttackTypeEnum GetAttackTypeForEquippedWeapon()
         {
+            //Remove (TESTS ONLY)
+            return AttackTypeEnum.Stock;
+
             if (EquippedItensManager.GetEquippedWeapon() == null)
             {
                 return AttackTypeEnum.Stock;
             }
-            return EquippedItensManager.GetEquippedWeapon().AttackType;
+            return EquippedItensManager.GetEquippedWeapon().CurrentAttackType;
         }
 
         public float IncreaseCombatSkillPoint()
@@ -88,7 +100,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
         {
             if (isRunning)
             {
-                return defaultSpeedValue * defaultRunningCoefficient;
+                return defaultSpeedValue * defaultRunningValue;
             }
 
             return defaultSpeedValue;
@@ -100,7 +112,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
 
             if (isRunning)
             {
-                float runningSpeedValue = diagonalSpeedValue * defaultRunningCoefficient;
+                float runningSpeedValue = diagonalSpeedValue * defaultRunningValue;
 
                 return runningSpeedValue;
             }
@@ -141,7 +153,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             double skillValue = BaseCreature.CombatSkills.GetSkillValueByName(equippedWeapon.SkillUsed);
             System.Random rnd = new System.Random();
 
-            if (equippedWeapon.AttackType != AttackTypeEnum.Ranged)
+            if (equippedWeapon.AttacksType.All(x => x != AttackTypeEnum.QuickRanged && x != AttackTypeEnum.LongRanged))
             {
                 return (BaseCreature.Strength + BaseCreature.Intelligence + equippedWeapon.Damage + skillValue + rnd.Next(0, 100)) / 5;
             }
@@ -151,6 +163,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
 
         public void ReceiveDamage(double damage)
         {
+            Debug.Log(string.Format("{0} - Damage received: {1}", GameObject.name, damage));
             //Damage received = (Resistance + Strength)/4 - damage
             BaseCreature.Health -= damage;
         }
@@ -165,7 +178,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
         public float GetAttackValue()
         {
             float skillValue = GetCombatSkillByWeapon().SkillValue;
-            int abilityBuffValue = EquippedItensManager.GetEquippedWeapon().AttackType == AttackTypeEnum.Ranged ? BaseCreature.Dexterity : BaseCreature.Strength;
+            int abilityBuffValue = EquippedItensManager.GetEquippedWeapon().AttacksType.Any(x => x == AttackTypeEnum.QuickRanged || x == AttackTypeEnum.LongRanged) ? BaseCreature.Dexterity : BaseCreature.Strength;
 
             return (skillValue * BaseCreature.Intelligence) / 2;
         }
@@ -196,26 +209,42 @@ namespace Assets.Scripts.Entities.ApplicationObjects
 
         public bool CanAttackTarget(BaseAppObject target)
         {
-            //Target has already defended the attack from this attacker
-            if (target.CombatManager.GetIsDefending() && target.CombatManager.GetParryingTarget() == this)
+            //if distance of target is greater than distance of attacker's weapon each, then the attack will fail
+            float distanceFromAttacker = Vector3.Distance(target.Transform.position, Transform.position);
+            float weaponReach = 1;
+            Debug.Log(distanceFromAttacker);
+            if (distanceFromAttacker > weaponReach)
             {
+                return false;
+            }
+
+            //Target has already defended the attack from this attacker
+            if (target.CombatManager.GetIsAttemptingToParry() && target.CombatManager.GetParryingTarget() == this)
+            {
+                //Target has defended, so it should be set to false
+                target.CombatManager.SetIsAttemptingToParryAttack(false);
+
                 Debug.Log("Blocked attack with parry");
 
                 return false;
             }
             //If is attacking a target that is parrying a different attacker, then this attacker will have
             //an instant success.
-            else if (target.CombatManager.GetIsDefending() && target.CombatManager.GetParryingTarget() != this)
+            else if (target.CombatManager.GetIsAttemptingToParry() && target.CombatManager.GetParryingTarget() != this)
             {
+                //Target has received an attack and is not defending anymore
+                target.CombatManager.SetIsAttemptingToParryAttack(false);
+
                 Debug.Log(target.GameObject.name + " foi atacado por outro objeto e perdeu a defesa");
                 return true;
             }
 
+            //Target will receive a mini-stun caused by attack either on his shield or on itself
+            AttackService.MiniStunTarget(target);
+
             //Target is trying to block with a shield
             if (target.CombatManager.GetIsBlockingWithShield())
             {
-                AttackService.MiniStunTarget(target);
-
                 if (AttackService.TargetIsBlockingAttackerDirectionsWithShield(this, target))
                 {
                     Debug.Log(target.GameObject.name + " is trying to block with shield");
@@ -239,6 +268,22 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             }
 
             StaminaManager.SetDecreasingStamina(true);
+        }
+
+        public void Die()
+        {
+            ObjectPoolingService = IoCContainer.GetImplementation<IObjectPoolingService>();
+            ObjectPoolingService.KillAndPoolNpc(this);
+        }
+
+        public bool IsAlive()
+        {
+            return BaseCreature.Health > 0;
+        }
+
+        public DirectionEnum GetFacingDirection()
+        {
+            return GameObject.GetComponent<IFacingDirection>().GetFacingDirection();
         }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IAttackTiming
     {
-        void WaitDelayAfterAttack(float delayTime);
+        //void WaitDelayAfterAttack(float delayTime);
     }
 }

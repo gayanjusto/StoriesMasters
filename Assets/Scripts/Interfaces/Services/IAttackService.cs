@@ -12,5 +12,6 @@ namespace Assets.Scripts.Interfaces.Services
         void MiniStunTarget(BaseAppObject target);
         void MiniStunTarget(BaseAppObject target, float timeToStun);
         float GetTimeForAttackDelay(BaseAppObject target);
+        bool AttackIsPastHalfWay(BaseAppObject attacker);
     }
 }

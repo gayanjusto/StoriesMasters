@@ -1,130 +1,111 @@
-﻿using Assets.Scripts.Entities.ApplicationObjects;
-using Assets.Scripts.Interfaces.Controllers;
-using Assets.Scripts.Interfaces.Managers.Combat;
+﻿using System;
 using Assets.Scripts.Interfaces.Managers.Inputs;
-using Assets.Scripts.Interfaces.Managers.Movement;
-using Assets.Scripts.Interfaces.Managers.Objects;
+using Assets.Scripts.Interfaces.Services;
 using Assets.Scripts.IoC;
 using Assets.Scripts.Managers.Combat;
-using System;
-using System.Threading;
 using UnityEngine;
 
 namespace Assets.Scripts.Managers.Inputs
 {
-    public class PlayerCombatInputManager : CombatEntryPointManager, /*IPlayerCombatInputManager*/ IAttackTiming
+    public class PlayerCombatInputManager : CombatEntryPointManager, IPlayerCombatInputManager
     {
-        public float _holdingDefenseInputTime;
-        public bool _isHoldingDefenseInput;
-        private IMovementManager _movementManager;
+        public float _timeDefenseInputPressed;
+        public float _timeAttackInputPressed;
 
-        private const float _parryInputTime = 0.3f;
+        public float _timeForParryInput;
+        public float _timeToCancelBlockInput;
 
-        #region PRIVATE METHODS
-        void Start()
+
+        IAttackTypeService _attackTypeService;
+
+        private void Start()
         {
-            _combatManager = GetComponent<ICombatManager>();
-            _objectManager = GetComponent<IObjectManager>();
-            _movementManager = GetComponent<IMovementManager>();
-            _combatController = IoCContainer.GetImplementation<ICombatController>();
+            base.SetBaseDependencies();
+
+            _attackTypeService = IoCContainer.GetImplementation<IAttackTypeService>();
         }
-        void Update()
+
+        private void Update()
         {
-
-            CheckHoldingDefenseInput();
-
-            if (!_hasDelegatedTriggered && _combatManager.CanAttack())
+            //will check only if not waiting for an action or suffering an action
+            if (_combatManager.CanAttack())
             {
-                CheckDefenseKeyPress();
-                CheckAttackKeyPress();
-            }
-            else if (_hasDelegatedTriggered && _combatManager.CanAttack())
-            {
-                Debug.Log("Has finished waiting: " + DateTime.Now);
-                //delegatedAction(_objectManager.GetBaseAppObject());
-                _hasDelegatedTriggered = false;
+                CheckAttackInput();
+                CheckDefenseInput();
             }
         }
 
-        void CheckDefenseKeyPress()
+        bool CheckAttackInput()
         {
-            if (Input.GetKey(KeyCode.Q) && _holdingDefenseInputTime >= _parryInputTime)
-            {
-                _combatManager.SetIsBlocking(true);
-                _movementManager.Disable();
-                Debug.Log("Desabilitou movimentos blocking escudo");
-            }
 
-            if (Input.GetKeyDown(KeyCode.Q))
-            {
-                _isHoldingDefenseInput = true;
-
-                Debug.Log("Defendeu");
-            }
-            else if (Input.GetKeyUp(KeyCode.Q))
-            {
-                if (_holdingDefenseInputTime <= _parryInputTime)
-                {
-                    _combatController.ParryAttack(_objectManager.GetBaseAppObject());
-                }
-
-                _isHoldingDefenseInput = false;
-
-                _combatManager.SetIsBlocking(false);
-            }
-        }
-
-        void CheckAttackKeyPress()
-        {
             if (Input.GetKey(KeyCode.E))
             {
-                base.InitiateAttack();
+                _timeAttackInputPressed += Time.deltaTime;
             }
-        }
 
-        void CheckHoldingDefenseInput()
-        {
-            if (_isHoldingDefenseInput)
+            if (Input.GetKeyUp(KeyCode.E))
             {
-                UpdateDefenseInputTime();
+                StartAttack();
+                return true;
             }
-            else
+
+            return false;
+        }
+
+        void CheckDefenseInput()
+        {
+            if (Input.GetKey(KeyCode.Q))
             {
-                ResetDefenseInputTime();
+                this._timeDefenseInputPressed += Time.deltaTime;
+
+                if (HasHoldInputForShieldBlock())
+                {
+                    base.StartShieldBlock();
+                    return;
+                }
+            }
+
+            if (Input.GetKeyUp(KeyCode.Q))
+            {
+                if (HasHoldInputForParry())
+                {
+                    //To parry an attack, defender must be facing the attacker
+                    //and attacker must be acting his attack
+                    if (!base.StartParryingBlock())
+                    {
+                        Reset();
+                    }
+                }
+                else
+                {
+                    Reset();
+                    base.CancelBlocking();
+                }
+
             }
         }
 
-        void UpdateDefenseInputTime()
+        bool HasHoldInputForParry()
         {
-            _holdingDefenseInputTime += Time.deltaTime;
+            return _timeDefenseInputPressed >= _timeToCancelBlockInput && _timeDefenseInputPressed <= _timeForParryInput;
         }
 
-        void ResetDefenseInputTime()
+        bool HasHoldInputForShieldBlock()
         {
-            _holdingDefenseInputTime = 0;
+            return _timeDefenseInputPressed >= _timeForParryInput;
         }
 
-        #endregion
-
-        public void WaitDelayAfterAttack(float delayTime)
+        void StartAttack()
         {
-
-            _combatManager.DisableAttackerActions(delayTime);
+            _attackTypeService.SetAttackTypeForPlayer(base._objectManager.GetBaseAppObject(), _timeAttackInputPressed);
+            base.InitiateAttack();
+            _timeAttackInputPressed = 0;
         }
 
-        //void IPlayerCombatInputManager.InitiateAttack()
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public bool CanPressAttackKey()
+        public void Reset()
         {
-            throw new NotImplementedException();
-        }
-
-        public bool CheckAttackInput()
-        {
-            throw new NotImplementedException();
+            _timeAttackInputPressed = 0;
+            _timeDefenseInputPressed = 0;
         }
     }
 }

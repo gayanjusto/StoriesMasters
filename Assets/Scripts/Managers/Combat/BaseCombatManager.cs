@@ -15,6 +15,8 @@ namespace Assets.Scripts.Managers.Combat
 {
     public class BaseCombatManager : TickTimeManager, ICombatManager
     {
+        public Color originalStatusColor;
+
         public int _attackSequence;
         public float _combatInputTime;
         public const float _combatInputDelayTime = .1f;
@@ -29,9 +31,9 @@ namespace Assets.Scripts.Managers.Combat
 
 
         /// <summary>
-        /// Object is defending an attack and waiting for its final action.
+        /// Object is parrying an attack and waiting for its final action.
         /// </summary>
-        public bool _isDefending;
+        public bool _isAttemptingToParry;
 
         /// <summary>
         /// Defines wether an object is blocking with a shield or not
@@ -40,36 +42,44 @@ namespace Assets.Scripts.Managers.Combat
 
         protected BaseAppObject _appObject;
         protected IMovementController _movementController;
-        protected ICombatController _combatController;
 
         protected IObjectManager _objectManager;
 
         protected IAttackService _attackService;
         protected IAttackTargetService _attackTargetService;
-
+        protected IDirectionService _directionService;
 
         #region PRIVATE METHODS
         void Start()
         {
             _movementController = IoCContainer.GetImplementation<IMovementController>();
-            _combatController = IoCContainer.GetImplementation<ICombatController>();
 
             _appObject = GetComponent<IObjectManager>().GetBaseAppObject();
 
             _attackService = IoCContainer.GetImplementation<IAttackService>();
             _attackTargetService = IoCContainer.GetImplementation<IAttackTargetService>();
+            _directionService = IoCContainer.GetImplementation<IDirectionService>();
+
+            originalStatusColor = transform.FindChild("SpriteRenderer").GetComponent<SpriteRenderer>().color;
         }
 
         protected void WaitForActionDelay()
         {
             if (_hasCastAction && IsWaitingFreezeTime())
             {
-                Debug.Log(_freezeTickTime);
                 TickTime();
             }
-            else if(_hasCastAction)
+            else if(_hasCastAction && !IsWaitingFreezeTime())
             {
+               
                 EnableAttackerActions();
+            }
+
+            //Change color back to original (DEBUG purpose only)
+            if (!_hasCastAction)
+            {
+                SpriteRenderer spriteRenderer = transform.FindChild("SpriteRenderer").GetComponent<SpriteRenderer>();
+                spriteRenderer.color = originalStatusColor;
             }
         }
 
@@ -79,12 +89,6 @@ namespace Assets.Scripts.Managers.Combat
 
         }
 
-        protected float GetTimeToResetAttackSequence()
-        {
-            _timeResetAttackSequence = _combatController.GetAttackDelayBasedOnEquippedWeapon(GetComponent<IObjectManager>().GetBaseAppObject(), false) + 3.0f;
-
-            return _timeResetAttackSequence;
-        }
 
         protected bool IsInAttackSequence()
         {
@@ -109,41 +113,44 @@ namespace Assets.Scripts.Managers.Combat
         }
         #endregion
 
+        //This is the basic algorithm for Enabling Attacker Actions
+        //Further algorithms should be overriden in their own class
         public virtual void EnableAttackerActions()
         {
+            //Debug.Log("Enabled attacker actions");
+
              ResetTickTime();
             _hasCastAction = false;
             _isAttacking = false;
             _hasAttackReady = false;
+
+            //Set AttackObserver to false, since it's not attacking anymore
+            GetComponent<IAttackObserver>().Disable();
+
+            GetComponent<IObjectManager>().GetBaseAppObject().HasActionsPrevented = false;
+            GetComponent<IMovementManager>().Enable();
         }
 
         public virtual void DisableAttackerActions()
         {
-            _movementController.DisableMovement(gameObject);
+            GetComponent<IMovementManager>().Disable();
         }
 
         public virtual void DisableAttackerActions(float freezeTime)
         {
+            //Set color for freezing
+            SpriteRenderer spriteRenderer = transform.FindChild("SpriteRenderer").GetComponent<SpriteRenderer>();
+            spriteRenderer.color = Color.blue;
+
+            //Keep the amount of time the object will wait
+            _freezeTickTime = freezeTime;
+
             _currentTickTime = freezeTime;
             _hasCastAction = true;
             DisableAttackerActions();
         }
 
-        public virtual void IncreaseSequenceWaitForAction()
-        {
-            _hasCastAction = true;
-            GetTimeToResetAttackSequence();
-
-            if (_attackSequence == _appObject.GetMaximumAttacks())
-            {
-                _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, true);
-                ResetAttackSequence();
-                return;
-            }
-
-            _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, false);
-            ++_attackSequence;
-        }
+   
 
         public int GetAttackSequence()
         {
@@ -157,7 +164,7 @@ namespace Assets.Scripts.Managers.Combat
         public bool CanAttack()
         {
             //Is not waiting for anything nor has cast an action or is ready for attack
-            return !IsWaitingFreezeTime() || (!_hasCastAction && !_hasAttackReady);
+            return !IsWaitingFreezeTime() && !_hasCastAction;
         }
 
 
@@ -181,14 +188,9 @@ namespace Assets.Scripts.Managers.Combat
             return _isAttacking;
         }
 
-        public bool GetIsDefending()
+        public bool GetIsAttemptingToParry()
         {
-            return _isDefending;
-        }
-
-        public void SetIsDefending(bool isDefending)
-        {
-            _isDefending = isDefending;
+            return _isAttemptingToParry;
         }
 
         public bool GetIsBlockingWithShield()
@@ -209,6 +211,7 @@ namespace Assets.Scripts.Managers.Combat
             _parryingTarget = target;
             _hasCastAction = true;
 
+
             GetComponent<IMovementObserver>().Enable();
         }
 
@@ -219,7 +222,7 @@ namespace Assets.Scripts.Managers.Combat
 
         public DirectionEnum[] GetBlockingDirections()
         {
-            return _movementController.GetNeighboringDirections(_appObject);
+            return _directionService.GetNeighborDirections(_appObject);
         }
 
         public void SetAttackReady(bool isAttackReady)
@@ -232,9 +235,15 @@ namespace Assets.Scripts.Managers.Combat
                 _lockedAttacktargets = _attackTargetService.GetTargetsForAttack(_appObject);
                 Debug.Log(_lockedAttacktargets);
 
-                //Get time to disable actions while is attacking
+                if(_lockedAttacktargets == null)
+                {
+                    return;
+                }
+
+                //Get time to disable actions while is casting attack
                 float attackDelayTime = _attackService.GetTimeForAttackDelay(_appObject);
                 DisableAttackerActions(attackDelayTime);
+                Debug.Log("Attack delay time: " + attackDelayTime);
 
                 //AttackObserver will read status and cast Attack if possible
                 GetComponent<IAttackObserver>().Enable();
@@ -262,6 +271,25 @@ namespace Assets.Scripts.Managers.Combat
         public bool GetHasCastAction()
         {
             return _hasCastAction;
+        }
+
+        public float GetCurrentTimeForAttackDelay()
+        {
+            if (!_hasCastAction)
+                return 0;
+
+            return _currentTickTime;
+        }
+
+        public float GetTotalFreezeTime()
+        {
+            return _freezeTickTime;
+        }
+
+        public void SetIsAttemptingToParryAttack(bool isAttemptingToParry)
+        {
+            //REFACTOR: this boolean should return the condition of whether a defender can parry or not, using his skills against the opponent
+            _isAttemptingToParry = isAttemptingToParry;
         }
     }
 }

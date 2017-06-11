@@ -10,78 +10,77 @@ using System;
 using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Controllers;
 using Assets.Scripts.IoC;
+using Assets.Scripts.Interfaces.Managers.Movement;
 
 namespace Assets.Scripts.Services
 {
     public class AttackService : IAttackService
     {
+        private ICombatVisualInformationService _combatVisualInfoService = IoCContainer.GetImplementation<ICombatVisualInformationService>();
+
+        public AttackService()
+        {
+            _combatVisualInfoService = IoCContainer.GetImplementation<ICombatVisualInformationService>();
+        }
 
         #region PRIVATE METHODS
-        bool StockAttack(BaseAppObject attackingObj, BaseAppObject target)
+        IList<BaseAppObject> GetTargetsHitByStockAttack(BaseAppObject attackingObj, BaseAppObject target, ref IList<BaseAppObject> targetsHit)
         {
             if (target == null)
             {
-                return false;
+                return targetsHit;
             }
 
-            if (AttackTarget(attackingObj, target) != null)
+            BaseAppObject targetHit = AttackTarget(attackingObj, target);
+            if (targetHit != null)
             {
-                MiniStunTarget(target);
-
-                return true;
+                targetsHit.Add(targetHit);
             }
 
-            return false;
+            return targetsHit;
         }
 
-        bool SwingAttack(BaseAppObject attackingObj, BaseAppObject[] targets)
+        IList<BaseAppObject> GetTargetsHitBySwingAttack(BaseAppObject attackingObj, BaseAppObject[] targets, ref IList<BaseAppObject> hitTargets)
         {
-            if (targets == null)
-            {
-                return false;
-            }
 
-            IList<BaseAppObject> hitTargets = AttackTargets(attackingObj, targets);
+            hitTargets = AttackTargets(attackingObj, targets);
 
-            if (hitTargets.Count > 0)
-            {
-                //REFACTOR
-                //Must MiniStun only those that were hit by the attack, out of the IF condition (it can stun the first, but not the last)
-                MiniStunTargets(hitTargets.ToArray());
 
-                return true;
-            }
-
-            return false;
+            return hitTargets;
         }
 
-        bool AttackByType(BaseAppObject attackingObj, BaseAppObject[] targets)
+        IList<BaseAppObject> AttackByType(BaseAppObject attackingObj, BaseAppObject[] targets)
         {
+            IList<BaseAppObject> hitTargets = new List<BaseAppObject>();
 
             switch (attackingObj.GetAttackTypeForEquippedWeapon())
             {
                 case AttackTypeEnum.Stock:
-                return StockAttack(attackingObj, targets[0]);
+                return GetTargetsHitByStockAttack(attackingObj, targets[0], ref hitTargets);
+                break;
                 case AttackTypeEnum.Swing:
-                return SwingAttack(attackingObj, targets);
+                GetTargetsHitBySwingAttack(attackingObj, targets, ref hitTargets);
+                break;
                 case AttackTypeEnum.SemiSwing:
                 //AttackTargetService: get targets surrouding 3 blocks object
                 //attack target
                 break;
-                case AttackTypeEnum.Ranged:
+                case AttackTypeEnum.QuickRanged:
                 break;
                 default:
-                return false;
+                return null;
             }
 
-            return false;
+            return hitTargets;
         }
 
 
 
-        void MiniStunTargets(BaseAppObject[] targets)
+        void MiniStunTargets(IList<BaseAppObject> targets)
         {
-            for (int i = 0; i < targets.Length; i++)
+            Debug.Log("Mini stunned targets");
+
+            for (int i = 0; i < targets.Count; i++)
             {
                 MiniStunTarget(targets[i]);
             }
@@ -89,6 +88,11 @@ namespace Assets.Scripts.Services
 
         BaseAppObject AttackTarget(BaseAppObject attackerObj, BaseAppObject target)
         {
+            //attacker has suffered any action that prevents him from continue his attack
+            if (attackerObj.HasActionsPrevented)
+            {
+                return null;
+            }
 
             //Calculate chances of hitting target or if target has already blocked this attacker
             if (attackerObj.CanAttackTarget(target))
@@ -103,13 +107,18 @@ namespace Assets.Scripts.Services
                 return target;
             }
 
-            DisableParryDefense(target);
+            // DisableParryDefense(target);
 
             return null;
         }
 
         IList<BaseAppObject> AttackTargets(BaseAppObject attackerObj, BaseAppObject[] targetsObjs)
         {
+            if (attackerObj.HasActionsPrevented)
+            {
+                return null;
+            }
+
             double damageDealtToTarget = attackerObj.GetDamageDealt(attackerObj.EquippedItensManager.GetEquippedWeapon());
 
             List<BaseAppObject> creaturesHit = new List<BaseAppObject>();
@@ -144,15 +153,16 @@ namespace Assets.Scripts.Services
 
         void DisableParryDefense(BaseAppObject defender)
         {
-            defender.CombatManager.SetIsDefending(false);
             defender.CombatManager.SetHasCastAction(false);
             defender.CombatManager.SetParryingTarget(null);
+            defender.CombatManager.SetIsAttemptingToParryAttack(false);
+
         }
 
         bool CanAttackTarget(BaseAppObject target, BaseAppObject attacker)
         {
             //Target has already defended the attack from this attacker
-            if (target.CombatManager.GetIsDefending() && target.CombatManager.GetParryingTarget() == attacker)
+            if (target.CombatManager.GetIsAttemptingToParry() && target.CombatManager.GetParryingTarget() == attacker)
             {
                 Debug.Log("Blocked attack with parry");
 
@@ -161,7 +171,7 @@ namespace Assets.Scripts.Services
 
             //If is attacking a target that is parrying a different attacker, then this attacker will have
             //an instant success.
-            if (target.CombatManager.GetIsDefending() && target.CombatManager.GetParryingTarget() != attacker)
+            if (target.CombatManager.GetIsAttemptingToParry() && target.CombatManager.GetParryingTarget() != attacker)
             {
                 Debug.Log(target.GameObject.name + " foi atacado por outro objeto e perdeu a defesa");
                 return true;
@@ -190,25 +200,48 @@ namespace Assets.Scripts.Services
 
         public bool Attack(BaseAppObject attackingObj)
         {
+            //Remove highlight of incoming attack for player
+            _combatVisualInfoService.RemoveHighlightAttackerInformation(attackingObj);
+
+            //has already casted an attack, so it should be set to false
+            //It's set to true in AttackObserver
+            attackingObj.CombatManager.SetIsAttacking(false);
+
+            //Set delay after attack
+            //REFACTOR: Get delay time based on attributes
+            attackingObj.CombatManager.DisableAttackerActions(2.0f);
+
             var attackerTargets = attackingObj.CombatManager.GetTargets();
 
-            //Can attack is already checked by input
-            //Can attack even without targets
-            //if (attackingObj.CombatManager.CanAttack() && attackerTargets != null)
-            //{
-
             //Increase attack sequence
-            attackingObj.CombatManager.IncreaseSequenceWaitForAction();
+            // attackingObj.CombatManager.IncreaseSequenceWaitForAction();
 
-            bool successfulAttack = AttackByType(attackingObj, attackerTargets);
-
-            if (successfulAttack)
+            if (attackerTargets == null || attackerTargets.Count() == 0)
             {
-                attackingObj.IncreaseCombatSkillPoint();
+                return false;
             }
 
-            return successfulAttack;
-            //}
+            IList<BaseAppObject> targetsHitByAttack = AttackByType(attackingObj, attackerTargets);
+
+
+            //Was a successful attack?
+            if (targetsHitByAttack != null && targetsHitByAttack.Count > 0)
+            {
+                MiniStunTargets(targetsHitByAttack);
+                attackingObj.IncreaseCombatSkillPoint();
+
+                //check if any target has died
+                for (int i = 0; i < targetsHitByAttack.Count; i++)
+                {
+                    if (!targetsHitByAttack[i].IsAlive())
+                    {
+                        targetsHitByAttack[i].Die();
+                    }
+                }
+                return true;
+            }
+
+            return false;
         }
 
         public bool TargetIsBlockingAttackerDirectionsWithShield(BaseAppObject attacker, BaseAppObject target)
@@ -216,8 +249,8 @@ namespace Assets.Scripts.Services
             IMovementController movementController = IoCContainer.GetImplementation<IMovementController>();
             IDirectionService directionService = IoCContainer.GetImplementation<IDirectionService>();
 
-            DirectionEnum attackerFacingDirection = attacker.MovementManager.GetFacingDirection();
-            DirectionEnum[] targetBlockingDirections = movementController.GetNeighboringDirections(target);
+            DirectionEnum attackerFacingDirection = attacker.GameObject.GetComponent<IFacingDirection>().GetFacingDirection();
+            DirectionEnum[] targetBlockingDirections = directionService.GetNeighborDirections(target);
 
             for (int i = 0; i < targetBlockingDirections.Length; i++)
             {
@@ -233,6 +266,7 @@ namespace Assets.Scripts.Services
         public void MiniStunTarget(BaseAppObject target)
         {
             target.CombatManager.DisableAttackerActions(2.5f);
+            target.HasActionsPrevented = true;
         }
 
         public void MiniStunTarget(BaseAppObject target, float timeToStun)
@@ -244,6 +278,12 @@ namespace Assets.Scripts.Services
         {
             //ToDo: Calculate time based on skills / equipment / weight
             return 5.0f;
+        }
+
+        public bool AttackIsPastHalfWay(BaseAppObject attacker)
+        {
+            //attack has spend more than half of the total of the swing/freeze time
+            return attacker.CombatManager.GetCurrentTimeForAttackDelay() < (attacker.CombatManager.GetTotalFreezeTime() / 2);
         }
     }
 }

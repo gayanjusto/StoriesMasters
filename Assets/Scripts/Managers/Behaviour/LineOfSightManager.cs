@@ -10,11 +10,15 @@ namespace Assets.Scripts.Managers.Behaviour
     {
         INpcTargetingManager _npcTargetingManager;
         INpcMovementManager _npcMovementManager;
+        INpcCombatManager _npcCombatManager;
+        INpcFacingDirectionManager _npcFacingDirectionManager;
 
         private void Start()
         {
             _npcTargetingManager = transform.parent.GetComponent<INpcTargetingManager>();
             _npcMovementManager = transform.parent.GetComponent<INpcMovementManager>();
+            _npcCombatManager = transform.parent.GetComponent<INpcCombatManager>();
+            _npcFacingDirectionManager = transform.parent.GetComponent<INpcFacingDirectionManager>();
         }
 
         private void OnTriggerEnter(Collider other)
@@ -23,18 +27,15 @@ namespace Assets.Scripts.Managers.Behaviour
             {
                 Debug.Log("Entrou visão");
 
+                _npcMovementManager.Enable();
                 _npcMovementManager.SetTarget(other.gameObject);
                 _npcTargetingManager.Enable();
+                _npcCombatManager.Enable();
+                _npcFacingDirectionManager.Enable();
+                _npcFacingDirectionManager.SetCurrentFacingTarget(other.gameObject.transform);
             }
         }
-        //private void OnCollisionEnter(Collision collision)
-        //{
-        //    if(collision.gameObject.tag == Tags.PlayerTag)
-        //    {
-        //        _npcMovementManager.SetTarget(collision.gameObject);
-        //        _npcTargetingManager.Enable();
-        //    }
-        //}
+  
 
         private void OnCollisionExit(Collision collision)
         {

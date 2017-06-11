@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Interfaces.Managers.Inputs;
+using Assets.Scripts.Interfaces.Managers.Movement;
 using UnityEngine;
 
 namespace Assets.Scripts.Managers.Combat
@@ -29,37 +30,48 @@ namespace Assets.Scripts.Managers.Combat
         }
         #endregion
 
-        public override void DisableAttackerActions()
+
+        //public override void IncreaseSequenceWaitForAction()
+        //{
+        //    _hasCastAction = true;
+
+        //    //REFACTOR: What does this do???
+        //    base._timeResetAttackSequence = GetTimeToResetAttackSequence();
+
+        //    //Player has reached the maximum of his attack sequence
+        //    if (_attackSequence == _appObject.GetMaximumAttacks())
+        //    {
+        //        //Set time to wait after sequence
+        //        _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, true);
+        //        SetCombatInputTime();
+
+
+        //        ResetAttackSequence();
+
+        //        return;
+        //    }
+
+        //    //Set time to wait after sequence
+        //    _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, false);
+        //    SetCombatInputTime();
+
+        //    ++_attackSequence;
+        //}
+
+        public override void EnableAttackerActions()
         {
-            _movementController.DisableMovement(gameObject);
-            _combatController.DisableCombatInput(gameObject);
+            base.EnableAttackerActions();
+
+            GetComponent<IPlayerCombatInputManager>().Enable();
+            base.SetIsBlocking(false);
         }
 
-        public override void IncreaseSequenceWaitForAction()
+        public override void DisableAttackerActions()
         {
-            _hasCastAction = true;
-
-            //REFACTOR: What does this do???
-            base._timeResetAttackSequence = GetTimeToResetAttackSequence();
-
-            //Player has reached the maximum of his attack sequence
-            if (_attackSequence == _appObject.GetMaximumAttacks())
-            {
-                //Set time to wait after sequence
-                _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, true);
-                SetCombatInputTime();
-
-
-                ResetAttackSequence();
-
-                return;
-            }
-
-            //Set time to wait after sequence
-            _currentTickTime = _combatController.GetAttackDelayBasedOnEquippedWeapon(_appObject, false);
-            SetCombatInputTime();
-
-            ++_attackSequence;
+            base.DisableAttackerActions();
+            IPlayerCombatInputManager combatInputManager = GetComponent<IPlayerCombatInputManager>();
+            combatInputManager.Reset();
+            combatInputManager.Disable();
         }
 
     }
