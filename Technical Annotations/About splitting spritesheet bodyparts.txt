@@ -1,4 +1,8 @@
 1) All bodyparts spritesheet must contain the same width per frame. That is:
  -> Feet spritesheet may have 26px of height, but it must have the same width as the largest part of the body. If the largest part is the arms with 20px of width, then all feet frames must be 20x26px.
 
+
+
 2) All spritesheets must have its width and height as power of 4. For instance: 4x4 / 16x16 / 20x16 / 64 x 4 / etc
+
+3) When cropping images in aseprite for spritesheets, make sure the cropped canvas has a power of four such as 20x24px

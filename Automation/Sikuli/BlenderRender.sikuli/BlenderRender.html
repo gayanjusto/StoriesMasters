@@ -1,0 +1,312 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }
+
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>BlenderRender.sikuli</h2> <a href="BlenderRender.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+<span class="cmt">#DEFINE REGIONS AND LOCATIONS</span>
+blenderObjSelectionRegion = Region(<span class="dig">1271</span>,<span class="dig">183</span>,<span class="dig">318</span>,<span class="dig">208</span>)
+torsoLocation = Location(<span class="dig">1326</span>, <span class="dig">374</span>)
+legsLocation = Location(<span class="dig">1328</span>, <span class="dig">354</span>)
+headLocation = Location(<span class="dig">1326</span>, <span class="dig">333</span>)
+handsLocation = Location(<span class="dig">1337</span>, <span class="dig">314</span>)
+feetLocation = Location(<span class="dig">1343</span>, <span class="dig">295</span>)
+armsLocation = Location(<span class="dig">1344</span>, <span class="dig">272</span>)
+
+blenderArmatureLocation = Location(<span class="dig">1335</span>, <span class="dig">195</span>)
+
+blenderToolbarRegion = Region(<span class="dig">1297</span>,<span class="dig">402</span>,<span class="dig">233</span>,<span class="dig">25</span>)
+blenderToolbarMaterialLocation = Location(<span class="dig">1466</span>, <span class="dig">413</span>)
+blenderToolbarRenderLocation = Location(<span class="dig">1308</span>, <span class="dig">413</span>)
+
+blenderRenderOptionsRegion = Region(<span class="dig">1254</span>,<span class="dig">466</span>,<span class="dig">326</span>,<span class="dig">74</span>)
+blenderRenderAnimationButton = Location(<span class="dig">1415</span>, <span class="dig">504</span>)
+
+blenderMaterialSelectionRegion = Region(<span class="dig">1257</span>,<span class="dig">458</span>,<span class="dig">317</span>,<span class="dig">203</span>)
+firstMaterialLocation = Location(<span class="dig">1301</span>, <span class="dig">487</span>) <span class="cmt">#usually the material you want to assing to the object</span>
+secondMaterialLocation = Location(<span class="dig">1305</span>, <span class="dig">508</span>) <span class="cmt">#can be either a material to hide the object (purple) or a second to assing to another part, such as left / right arm</span>
+thirdMaterialLocation = Location(<span class="dig">1309</span>, <span class="dig">530</span>) <span class="cmt">#hidden material for parts that have more than 2 materials</span>
+assignButtonLocation = Location(<span class="dig">1311</span>, <span class="dig">591</span>)
+
+
+blender3DViewRegion = Region(<span class="dig">45</span>,<span class="dig">120</span>,<span class="dig">498</span>,<span class="dig">555</span>)
+blenderLeftArm3DViewLocation1 = Location(<span class="dig">316</span>, <span class="dig">263</span>) <span class="cmt">#we want to select the left arm in edit mode, so this is the first point for a mouse drag</span>
+blenderLeftArm3DViewLocation2 = Location(<span class="dig">446</span>, <span class="dig">394</span>) <span class="cmt">#the drop part of the left arm selection</span>
+
+blenderLeftLeg3DViewLocation1 = Location(<span class="dig">298</span>, <span class="dig">260</span>)
+blenderLeftLeg3DViewLocation2 = Location(<span class="dig">385</span>, <span class="dig">516</span>)
+
+blenderLeftFoot3DViewLocation1 = Location(<span class="dig">306</span>, <span class="dig">460</span>)
+blenderLeftFoot3DViewLocation2 = Location(<span class="dig">378</span>, <span class="dig">562</span>)
+
+
+blenderFramesRegion = Region(<span class="dig">545</span>,<span class="dig">823</span>,<span class="dig">95</span>,<span class="dig">30</span>)
+blenderFramesLocation = Location(<span class="dig">589</span>, <span class="dig">840</span>)
+
+<span class="cmt">#SET BLENDER ICON IMAGE</span>
+blenderIcon = <img src="1497401162655.png" />
+
+
+<span class="cmt">#SET VARIABLES</span>
+bodyParts = [<span class="str">"Head"</span>, <span class="str">"Arms"</span>, <span class="str">"Hands"</span>, <span class="str">"Torso"</span>, <span class="str">"Legs"</span>, <span class="str">"Feet"</span>]
+bodyPartsLocation = [headLocation, armsLocation, handsLocation, torsoLocation, legsLocation, feetLocation]
+basePlayerBodyPath = str(<span class="str">"F:\\Projetos\\StoriesMasters\\2D Assets\\CombatWalking\\Player\\"</span>)
+renderOutputPath = str(<span class="str">"F:\\RenderOutpu"</span>)
+
+previousBodyPart = <span class="dig">0</span>
+
+
+<span class="cmt">#ITERATION BETWEEN BODYPARTS</span>
+<span class="kw">for</span> bodyPartIndex <span class="kw">in</span> range(len(bodyParts)):
+        currentBodyPart = bodyParts[bodyPartIndex]
+        <span class="cmt">#RESET DESKTOP</span>
+        <span class="skw">type</span>(<span class="str">"d"</span>, KeyModifier.WIN) <span class="cmt">#Windows + D</span>
+
+        <span class="cmt">#OPEN BLENDER</span>
+        <span class="skw">click</span>(blenderIcon)
+
+        <span class="cmt">#Click to select bodypart in Blender</span>
+        <span class="kw">print</span>(bodyPartsLocation[bodyPartIndex])
+        blenderObjSelectionRegion.<span class="skw">click</span>(bodyPartsLocation[bodyPartIndex])
+
+
+
+
+        <span class="cmt">#Set material for bodyPart</span>
+        blenderToolbarRegion.<span class="skw">click</span>(blenderToolbarMaterialLocation)
+
+        <span class="cmt">#assign material to the bodypart selected</span>
+        hover(blender3DViewRegion)
+        keyDown(Key.TAB)
+        keyUp(Key.TAB)
+        <span class="skw">type</span>(<span class="str">"z"</span>)
+        <span class="skw">wait</span>(<span class="dig">1</span>)
+        <span class="skw">type</span>(<span class="str">"a"</span>)
+        blenderMaterialSelectionRegion.<span class="skw">click</span>(firstMaterialLocation)
+        blenderMaterialSelectionRegion.<span class="skw">click</span>(assignButtonLocation)
+
+        <span class="cmt">#unselect all vertices</span>
+        hover(blender3DViewRegion)
+        <span class="skw">wait</span>(<span class="dig">1</span>)
+        <span class="skw">type</span>(<span class="str">"a"</span>)
+
+        <span class="cmt">#Remove wireframe view</span>
+        hover(blender3DViewRegion)
+        <span class="skw">type</span>(<span class="str">"z"</span>)
+
+
+
+        <span class="cmt">#if bodypart is arms, we must select the left arm only in edit mode in order to assign a different material to it</span>
+        <span class="kw">if</span>(currentBodyPart == <span class="str">"Arms"</span> <span class="kw">or</span> currentBodyPart == <span class="str">"Legs"</span> <span class="kw">or</span> currentBodyPart == <span class="str">"Feet"</span>):
+            hover(blender3DViewRegion)
+            <span class="skw">type</span>(<span class="str">"z"</span>)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="skw">type</span>(<span class="str">"b"</span>)
+            <span class="kw">if</span>(currentBodyPart == <span class="str">"Arms"</span>):
+                <span class="skw">dragDrop</span>(blenderLeftArm3DViewLocation1, blenderLeftArm3DViewLocation2)
+                blenderMaterialSelectionRegion.<span class="skw">click</span>(secondMaterialLocation)
+                blenderMaterialSelectionRegion.<span class="skw">click</span>(assignButtonLocation)
+            <span class="kw">if</span>(currentBodyPart == <span class="str">"Legs"</span>):
+                <span class="skw">dragDrop</span>(blenderLeftLeg3DViewLocation1, blenderLeftLeg3DViewLocation2)
+                blenderMaterialSelectionRegion.<span class="skw">click</span>(secondMaterialLocation)
+                blenderMaterialSelectionRegion.<span class="skw">click</span>(assignButtonLocation)
+            <span class="kw">if</span>(currentBodyPart == <span class="str">"Feet"</span>):
+                <span class="skw">dragDrop</span>(blenderLeftFoot3DViewLocation1, blenderLeftFoot3DViewLocation2)
+                blenderMaterialSelectionRegion.<span class="skw">click</span>(secondMaterialLocation)
+                blenderMaterialSelectionRegion.<span class="skw">click</span>(assignButtonLocation)
+
+            <span class="cmt">#Remove all selection</span>
+            hover(blender3DViewRegion)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+            <span class="skw">type</span>(<span class="str">"a"</span>)
+
+            <span class="cmt">#Remove wireframe view</span>
+            <span class="skw">type</span>(<span class="str">"z"</span>)
+
+
+
+        <span class="cmt">#exit edit mode</span>
+        keyDown(Key.TAB)
+        keyUp(Key.TAB)
+
+
+        angles = [<span class="str">"a1"</span>, <span class="str">"a2"</span>, <span class="str">"a3"</span>,<span class="str">"a4"</span>, <span class="str">"a5"</span>, <span class="str">"a6"</span>, <span class="str">"a7"</span>, <span class="str">"a8"</span> ]
+        <span class="kw">for</span> angleIndex <span class="kw">in</span> range(len(angles)):
+
+            currentAngle = angles[angleIndex]
+            <span class="cmt">#set output path</span>
+            renderBodyPartOutput = str(basePlayerBodyPath) + str(currentBodyPart) + <span class="str">"\\"</span> + <span class="str">"\\"</span> + str(currentAngle)
+
+            <span class="kw">print</span>(renderBodyPartOutput)
+
+            <span class="cmt">#Select Blender Armature</span>
+            blenderObjSelectionRegion.<span class="skw">click</span>(blenderArmatureLocation)
+            hover(blender3DViewRegion)
+
+            <span class="cmt">#rotate object in -45º</span>
+            <span class="skw">type</span>(<span class="str">"r"</span>)
+            <span class="skw">type</span>(<span class="str">"z"</span>)
+            <span class="skw">type</span>(<span class="str">"-"</span>)
+            <span class="skw">type</span>(<span class="str">"45"</span>)
+            keyDown(Key.ENTER)
+            keyUp(Key.ENTER)
+
+            <span class="cmt">#select render options from toolbar</span>
+            blenderToolbarRegion.<span class="skw">click</span>(blenderToolbarRenderLocation)
+
+
+            <span class="cmt">#animate</span>
+            blenderRenderOptionsRegion.<span class="skw">click</span>(blenderRenderAnimationButton)
+
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#open render output folder</span>
+            <span class="skw">type</span>(<span class="str">"r"</span>, KeyModifier.WIN) <span class="cmt">#Windows + D</span>
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#paste folder path in windows run command</span>
+            <span class="skw">type</span>(str(renderOutputPath))
+            keyDown(Key.ENTER)
+            keyUp(Key.ENTER)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+            keyDown(Key.F5)
+            keyUp(Key.F5)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#cut all rendered images</span>
+            keyDown(Key.CTRL)
+            <span class="skw">type</span>(<span class="str">"a"</span>)
+            <span class="skw">type</span>(<span class="str">"x"</span>)
+            keyUp(Key.CTRL)
+
+            <span class="cmt">#close render output window</span>
+            keyDown(Key.CTRL)
+            <span class="skw">type</span>(<span class="str">"w"</span>)
+            keyUp(Key.CTRL)
+
+            <span class="cmt">#open path to paste rendered images</span>
+            <span class="skw">type</span>(<span class="str">"r"</span>, KeyModifier.WIN) <span class="cmt">#Windows + D</span>
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+             <span class="cmt">#paste folder path in windows run command</span>
+            <span class="skw">type</span>(str(renderBodyPartOutput))
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+            keyDown(Key.ENTER)
+            keyUp(Key.ENTER)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#paste images</span>
+            keyDown(Key.CTRL)
+            <span class="skw">type</span>(<span class="str">"v"</span>)
+            keyUp(Key.CTRL)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#close pasted images folder    </span>
+            keyDown(Key.CTRL)
+            <span class="skw">type</span>(<span class="str">"w"</span>)
+            keyUp(Key.CTRL)
+
+            <span class="cmt">#RESET DESKTOP</span>
+            <span class="skw">type</span>(<span class="str">"d"</span>, KeyModifier.WIN) <span class="cmt">#Windows + D</span>
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#OPEN BLENDER</span>
+            <span class="skw">click</span>(blenderIcon)
+
+        <span class="cmt">#click bodypart again</span>
+        blenderObjSelectionRegion.<span class="skw">click</span>(bodyPartsLocation[bodyPartIndex])
+
+        <span class="cmt">#Set material for bodyPart</span>
+        blenderToolbarRegion.<span class="skw">click</span>(blenderToolbarMaterialLocation)
+
+        <span class="cmt">#Replace hidden material for bodypart</span>
+        hover(blender3DViewRegion)
+
+        <span class="cmt">#enter edit mode</span>
+        keyDown(Key.TAB)
+        keyUp(Key.TAB)
+        <span class="skw">wait</span>(<span class="dig">1</span>)
+        <span class="skw">type</span>(<span class="str">"a"</span>)
+
+        blenderMaterialSelectionRegion.<span class="skw">click</span>(secondMaterialLocation)
+
+        <span class="kw">if</span>(currentBodyPart == <span class="str">"Arms"</span> <span class="kw">or</span> currentBodyPart == <span class="str">"Legs"</span> <span class="kw">or</span> currentBodyPart == <span class="str">"Feet"</span>):
+                    blenderMaterialSelectionRegion.<span class="skw">click</span>(thirdMaterialLocation)
+
+        blenderMaterialSelectionRegion.<span class="skw">click</span>(assignButtonLocation)
+
+        <span class="cmt">#Remove selection</span>
+        hover(blender3DViewRegion)
+        <span class="skw">wait</span>(<span class="dig">1</span>)
+        <span class="skw">type</span>(<span class="str">"a"</span>)
+        <span class="skw">wait</span>(<span class="dig">1</span>)
+</pre>
+</body>
+</html>

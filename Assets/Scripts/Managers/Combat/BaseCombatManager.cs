@@ -60,7 +60,6 @@ namespace Assets.Scripts.Managers.Combat
             _attackTargetService = IoCContainer.GetImplementation<IAttackTargetService>();
             _directionService = IoCContainer.GetImplementation<IDirectionService>();
 
-            originalStatusColor = transform.FindChild("SpriteRenderer").GetComponent<SpriteRenderer>().color;
         }
 
         protected void WaitForActionDelay()
@@ -73,13 +72,6 @@ namespace Assets.Scripts.Managers.Combat
             {
                
                 EnableAttackerActions();
-            }
-
-            //Change color back to original (DEBUG purpose only)
-            if (!_hasCastAction)
-            {
-                SpriteRenderer spriteRenderer = transform.FindChild("SpriteRenderer").GetComponent<SpriteRenderer>();
-                spriteRenderer.color = originalStatusColor;
             }
         }
 

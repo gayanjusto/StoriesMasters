@@ -1,0 +1,173 @@
+
+<html>
+   <head>
+      <style type="text/css">
+         .sikuli-code {
+            font-size: 20px;
+            font-family: "Osaka-mono", Monospace;
+            line-height: 1.5em;
+            display:table-cell;
+            white-space: pre-wrap;       /* css-3 */
+            white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+            width: 99%;   /* remove horizontal scroll-bar when viewing in IE7 */
+         }
+         .sikuli-code img {
+            vertical-align: middle;
+            margin: 2px;
+            border: 1px solid #ccc;
+            padding: 2px;
+            -moz-border-radius: 5px;
+            -webkit-border-radius: 5px;
+            -moz-box-shadow: 1px 1px 1px gray;
+            -webkit-box-shadow: 1px 1px 2px gray;
+         }
+         .kw {
+            color: blue;
+         }
+         .skw {
+            color: rgb(63, 127, 127);
+         }
+
+         .str {
+            color: rgb(128, 0, 0);
+         }
+
+         .dig {
+            color: rgb(128, 64, 0);
+         }
+
+         .cmt {
+            color: rgb(200, 0, 200);
+         }
+
+         h2 {
+            display: inline;
+            font-weight: normal;
+         }
+
+         .info {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+            display: none;
+         }
+
+         a {
+            color: #9D2900;
+         }
+
+         body {
+            font-family: "Trebuchet MS", Arial, Sans-Serif;
+         }
+
+      </style>
+   </head>
+<body>
+<div class="info">
+<h2>GIMP.sikuli</h2> <a href="GIMP.zip">(Download this script)</a>
+</div>
+<pre class="sikuli-code">
+<span class="cmt">#ICONS</span>
+gimpIcon = <img src="1497549151350.png" />
+
+
+<span class="cmt">#REGIONS AND LOCATIONS</span>
+openFileRegion = Region(<span class="dig">358</span>,<span class="dig">234</span>,<span class="dig">152</span>,<span class="dig">316</span>)
+partitionLocation = Location(<span class="dig">418</span>, <span class="dig">470</span>)
+
+fileLocationRegion = Region(<span class="dig">354</span>,<span class="dig">234</span>,<span class="dig">342</span>,<span class="dig">35</span>)
+fileLocationPathLocation = Location(<span class="dig">474</span>, <span class="dig">254</span>)
+
+gimpImageRegion = Region(<span class="dig">763</span>,<span class="dig">413</span>,<span class="dig">72</span>,<span class="dig">67</span>)
+bodyPartsHiddenMaterialLocation = Location(<span class="dig">796</span>, <span class="dig">425</span>)
+headHiddenMaterialLocation = Location(<span class="dig">796</span>, <span class="dig">445</span>)
+
+basePathToImages = <span class="str">"F:\\Projetos\\StoriesMasters\\2D Assets\\CombatWalking\\Player"</span>
+
+bodyParts = [<span class="str">"Head"</span>, <span class="str">"Arms"</span>, <span class="str">"Hands"</span>, <span class="str">"Torso"</span>, <span class="str">"Legs"</span>, <span class="str">"Feet"</span>]
+angles = [<span class="str">"a1"</span>, <span class="str">"a2"</span>,<span class="str">"a3"</span>,<span class="str">"a4"</span>,<span class="str">"a5"</span>,<span class="str">"a6"</span>,<span class="str">"a7"</span>,<span class="str">"a8"</span>]
+frames = [<span class="dig">0</span>,<span class="dig">1</span>,<span class="dig">2</span>,<span class="dig">3</span>,<span class="dig">4</span>,<span class="dig">5</span>,<span class="dig">6</span>,<span class="dig">7</span>,<span class="dig">8</span>,<span class="dig">9</span>]
+
+amountImg = <span class="dig">0</span>
+<span class="kw">for</span> bodyPartIndex <span class="kw">in</span> range(len(bodyParts)):
+    currentBodyPart = str(bodyParts[bodyPartIndex])
+    <span class="kw">for</span> angleIndex <span class="kw">in</span> range(len(angles)):
+        <span class="kw">for</span> frame <span class="kw">in</span> frames:
+            currentFrame = <span class="str">"0"</span> + str(frame)
+            pathToImage = basePathToImages + <span class="str">"\\"</span> + str(currentBodyPart) + <span class="str">"\\"</span> + str(angles[angleIndex]) + <span class="str">"\\"</span> + str(currentFrame) + <img src=".png" />
+
+            <span class="cmt">#open image hotkeys</span>
+            keyDown(Key.CTRL)
+            <span class="skw">type</span>(<span class="str">"o"</span>)
+            keyUp(Key.CTRL)
+
+            <span class="cmt">#click on ''F'' partition</span>
+            openFileRegion.<span class="skw">click</span>(partitionLocation)
+
+            <span class="cmt">#set path to image</span>
+            fileLocationRegion.<span class="skw">click</span>(fileLocationPathLocation)
+
+            <span class="cmt">#select entire path and delete it</span>
+            keyDown(Key.CTRL)
+            <span class="skw">type</span>(<span class="str">"a"</span>)
+            keyUp(Key.CTRL)
+            <span class="skw">type</span>(Key.DELETE)
+
+            <span class="cmt">#paste path</span>
+            <span class="skw">type</span>(str(pathToImage))
+
+            <span class="cmt">#open image</span>
+            <span class="skw">type</span>(Key.ENTER)
+
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+            <span class="cmt">#select hidden path material by color</span>
+            keyDown(Key.SHIFT)
+            <span class="skw">type</span>(<span class="str">"o"</span>)
+            keyUp(Key.SHIFT)
+
+            <span class="kw">if</span>(currentBodyPart == <span class="str">"Head"</span>):
+                gimpImageRegion.<span class="skw">click</span>(headHiddenMaterialLocation)
+            <span class="kw">else</span>:
+                gimpImageRegion.<span class="skw">click</span>(bodyPartsHiddenMaterialLocation)
+
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+            <span class="cmt">#delete hidden material</span>
+            <span class="skw">type</span>(Key.DELETE)
+
+            <span class="cmt">#save image</span>
+            keyDown(Key.CTRL)
+            keyDown(Key.SHIFT)
+            <span class="skw">type</span>(<span class="str">"e"</span>)
+            keyUp(Key.CTRL)
+            keyUp(Key.SHIFT)
+
+            <span class="skw">type</span>(Key.ENTER)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#confirm</span>
+            <span class="skw">type</span>(Key.ENTER)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#confirm export</span>
+            <span class="skw">type</span>(Key.ENTER)
+
+            <span class="cmt">#close image</span>
+            keyDown(Key.CTRL)
+            <span class="skw">type</span>(<span class="str">"w"</span>)
+            keyUp(Key.CTRL)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#confirm discard changes</span>
+            keyDown(Key.ALT)
+            <span class="skw">type</span>(<span class="str">"d"</span>)
+            keyUp(Key.ALT)
+            <span class="skw">wait</span>(<span class="dig">1</span>)
+
+            <span class="cmt">#loop</span>
+
+</pre>
+</body>
+</html>
