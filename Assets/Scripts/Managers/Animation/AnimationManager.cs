@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Enums;
+using Assets.Scripts.Factories.AnimatorControllers;
 using Assets.Scripts.Interfaces.Managers.Movement;
 using UnityEngine;
 
@@ -15,20 +16,22 @@ public class AnimationManager : MonoBehaviour
 
     Animator[] _bodyAnimators;
 
+    IMovementManager _movementManager;
     IFacingDirection _facingDirection;
+
+    //Direction
+    int directionParameterId = Animator.StringToHash("Direction");
     DirectionEnum _currentFacingDirection;
     DirectionEnum _previousFacingDirection;
 
-
-    int upHash = Animator.StringToHash("Up");
-    int downHash = Animator.StringToHash("Down");
-    int leftHash = Animator.StringToHash("Left");
-    int rightHash = Animator.StringToHash("Right");
-
+    //Walking
+    int walkingParameterId = Animator.StringToHash("Walking");
+    bool _previousWalkingCondition;
 
     // Use this for initialization
     void Start()
     {
+        PlayerAnimatorControllerFactory.Create("teste");
         _animationRender = transform.Find("AnimationRender");
 
         _bodyAnimators = new Animator[6];
@@ -52,100 +55,42 @@ public class AnimationManager : MonoBehaviour
         _bodyAnimators[5] = _feetAnimatorController;
 
         _facingDirection = GetComponent<IFacingDirection>();
+        _movementManager = GetComponent<IMovementManager>();
     }
 
     private void Update()
     {
+        if (_movementManager.IsMoving() != _previousWalkingCondition)
+        {
+            
+            SetAnimationWalkingValue(_movementManager.IsMoving());
+            _previousWalkingCondition = _movementManager.IsMoving();
+        }
+       
         _currentFacingDirection = _facingDirection.GetFacingDirection();
 
-        if (_currentFacingDirection == DirectionEnum.Up && _previousFacingDirection != _currentFacingDirection)
+        if(_currentFacingDirection != _previousFacingDirection)
         {
-            SetAnimationBoolDirection(upHash, true);
-            DisableOtherAnimationDirection(new[] { downHash, leftHash, rightHash });
-
-            _previousFacingDirection = _currentFacingDirection;
-            return;
-        }
-        if (_currentFacingDirection == DirectionEnum.Down && _previousFacingDirection != _currentFacingDirection)
-        {
-            SetAnimationBoolDirection(downHash, true);
-            DisableOtherAnimationDirection(new[] { upHash, leftHash, rightHash });
-
-            _previousFacingDirection = _currentFacingDirection;
-            return;
-        }
-        if (_currentFacingDirection == DirectionEnum.Left && _previousFacingDirection != _currentFacingDirection)
-        {
-            SetAnimationBoolDirection(leftHash, true);
-            DisableOtherAnimationDirection(new[] { upHash, downHash, rightHash });
-
-            _previousFacingDirection = _currentFacingDirection;
-            return;
-        }
-        if (_currentFacingDirection == DirectionEnum.Right && _previousFacingDirection != _currentFacingDirection)
-        {
-            SetAnimationBoolDirection(rightHash, true);
-            DisableOtherAnimationDirection(new[] { upHash, downHash, leftHash });
-
-            _previousFacingDirection = _currentFacingDirection;
-            return;
-        }
-        if (_currentFacingDirection == DirectionEnum.UpLeft && _previousFacingDirection != _currentFacingDirection)
-        {
-            SetAnimationBoolDirection(upHash, true);
-            SetAnimationBoolDirection(leftHash, true);
-
-            DisableOtherAnimationDirection(new[] { downHash, rightHash });
-            _previousFacingDirection = _currentFacingDirection;
-            return;
-        }
-        if (_currentFacingDirection == DirectionEnum.UpRight && _previousFacingDirection != _currentFacingDirection)
-        {
-            SetAnimationBoolDirection(upHash, true);
-            SetAnimationBoolDirection(rightHash, true);
-
-            DisableOtherAnimationDirection(new[] { downHash, leftHash });
-            _previousFacingDirection = _currentFacingDirection;
-            return;
-        }
-        if (_currentFacingDirection == DirectionEnum.DownLeft && _previousFacingDirection != _currentFacingDirection)
-        {
-            SetAnimationBoolDirection(downHash, true);
-            SetAnimationBoolDirection(leftHash, true);
-
-            DisableOtherAnimationDirection(new[] { upHash, rightHash });
-            _previousFacingDirection = _currentFacingDirection;
-            return;
-        }
-        if (_currentFacingDirection == DirectionEnum.DownRight && _previousFacingDirection != _currentFacingDirection)
-        {
-            SetAnimationBoolDirection(downHash, true);
-            SetAnimationBoolDirection(rightHash, true);
-
-            DisableOtherAnimationDirection(new[] { upHash, leftHash });
+            SetAnimationDirectionValue(_currentFacingDirection.GetHashCode());
             _previousFacingDirection = _currentFacingDirection;
             return;
         }
     }
 
-    void SetAnimationBoolDirection(int direction, bool value)
+    void SetAnimationDirectionValue(int value)
     {
         for (int i = 0; i < _bodyAnimators.Length; i++)
         {
-            _bodyAnimators[i].SetBool(direction, value);
+            _bodyAnimators[i].SetInteger(directionParameterId, value);
         }
     }
 
-  
-
-    void DisableOtherAnimationDirection(int[] directionsToDisable)
+    void SetAnimationWalkingValue(bool value)
     {
         for (int i = 0; i < _bodyAnimators.Length; i++)
         {
-            for (int x = 0; x < directionsToDisable.Length; x++)
-            {
-                _bodyAnimators[i].SetBool(directionsToDisable[x], false);
-            }
+            _bodyAnimators[i].SetBool(walkingParameterId, value);
         }
     }
+
 }
