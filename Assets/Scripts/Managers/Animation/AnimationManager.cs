@@ -31,7 +31,20 @@ public class AnimationManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        PlayerAnimatorControllerFactory.Create("teste");
+        //DEBUG
+        PlayerArmsAnimatorControllerFactory testeArms = new PlayerArmsAnimatorControllerFactory();
+        testeArms.Create();
+        //PlayerFeetAnimatorControllerFactory testeFeet = new PlayerFeetAnimatorControllerFactory();
+        //testeFeet.Create();
+        //PlayerHandsAnimatorControllerFactory testeHands = new PlayerHandsAnimatorControllerFactory();
+        //testeHands.Create();
+        //PlayerHeadAnimatorControllerFactory testeHead = new PlayerHeadAnimatorControllerFactory();
+        //testeHead.Create();
+        //PlayerLegsAnimatorControllerFactory testeLegs = new PlayerLegsAnimatorControllerFactory();
+        //testeLegs.Create();
+        //PlayerTorsoAnimatorControllerFactory testeTorso = new PlayerTorsoAnimatorControllerFactory();
+        //testeTorso.Create();
+
         _animationRender = transform.Find("AnimationRender");
 
         _bodyAnimators = new Animator[6];

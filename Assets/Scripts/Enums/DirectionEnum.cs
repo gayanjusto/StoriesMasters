@@ -3,14 +3,14 @@
     public enum  DirectionEnum
     {
         None = 0,
-        Up = 1,
-        UpRight = 2,
-        Right = 3,
-        DownRight = 4,
-        Down = 5,
-        DownLeft = 6,
-        Left = 7,
-        UpLeft = 8
+        DownLeft = 1,
+        Left = 2,
+        UpLeft = 3,
+        Up = 4,
+        UpRight = 5,
+        Right = 6,
+        DownRight =7,
+        Down = 8,
     }
 }
 
