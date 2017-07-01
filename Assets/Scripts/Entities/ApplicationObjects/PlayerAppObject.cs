@@ -15,31 +15,6 @@ namespace Assets.Scripts.Entities.ApplicationObjects
     {
         public PlayerAppObject(
             GameObject gameObject,
-            Transform transform,
-            BaseCreature baseCreature,
-            IStaminaManager staminaManager,
-            ICombatManager combatManager,
-            IEquippedItensManager equippedItensManager,
-            IMovementManager movementManager,
-            IObjectManager objectManager,
-            IPlayerCombatInputManager playerCombatInputManager,
-            IComponentsManager componentsManager) : base
-            (
-                gameObject,
-                transform,
-                baseCreature, 
-                staminaManager,
-                combatManager,
-                equippedItensManager,
-                movementManager,
-                objectManager,
-                componentsManager
-                )
-        {
-            PlayerCombatInputManager = playerCombatInputManager;
-        }
-
-        public IPlayerCombatInputManager PlayerCombatInputManager { get; set; }
-
+            BaseCreature baseCreature) : base(gameObject, baseCreature) { }
     }
 }

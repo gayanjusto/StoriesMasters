@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Entities.ApplicationObjects;
 using Assets.Scripts.Interfaces.Controllers;
 using Assets.Scripts.Interfaces.Managers.Combat;
+using Assets.Scripts.Interfaces.Managers.Itens;
 using Assets.Scripts.Interfaces.Managers.Movement;
 using Assets.Scripts.Interfaces.Managers.Objects;
 using Assets.Scripts.IoC;
@@ -13,6 +14,7 @@ namespace Assets.Scripts.Managers.Combat
     {
         private INpcMovementManager _npcMovementManager;
         private IMovementController _movementController;
+        private IEquippedItensManager _equippedItensManager;
 
         private BaseAppObject _baseAppObject;
 
@@ -24,7 +26,7 @@ namespace Assets.Scripts.Managers.Combat
             _npcMovementManager = GetComponent<INpcMovementManager>();
             _combatManager = GetComponent<ICombatManager>();
             _baseAppObject = _objectManager.GetBaseAppObject();
-
+            _equippedItensManager = GetComponent<IEquippedItensManager>();
 
             _movementController = IoCContainer.GetImplementation<IMovementController>();
 
@@ -34,11 +36,11 @@ namespace Assets.Scripts.Managers.Combat
 
         private void Update()
         {
-            if (IsCloseToTarget() && _baseAppObject.CombatManager.CanAttack())
+            if (IsCloseToTarget() && _combatManager.CanAttack())
             {
                 AttackTarget();
             }
-            else if (_baseAppObject.CombatManager.CanAttack() && IsCloseToTarget())
+            else if (_combatManager.CanAttack() && IsCloseToTarget())
             {
                 Debug.Log(gameObject.name + " Has finished waiting: " + DateTime.Now);
 
@@ -58,7 +60,7 @@ namespace Assets.Scripts.Managers.Combat
         bool IsCloseToTarget()
         {
 
-            return _npcMovementManager.GetDistanceFromTarget() <= _baseAppObject.EquippedItensManager.GetEquippedWeapon().WeaponRange;
+            return _npcMovementManager.GetDistanceFromTarget() <= _equippedItensManager.GetEquippedWeapon().WeaponRange;
         }
 
         #endregion

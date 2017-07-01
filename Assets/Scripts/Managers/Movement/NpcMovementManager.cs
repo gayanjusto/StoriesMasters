@@ -7,18 +7,24 @@ using UnityEngine.AI;
 
 namespace Assets.Scripts.Managers.Movement
 {
-    public class NpcMovementManager : BaseMonoBehaviour, IMovementManager, INpcMovementManager
+    public class NpcMovementManager : BaseMonoBehaviour, IMovementManager, INpcMovementManager, IFacingDirection
     {
-        public Transform target;
-        NavMeshAgent agent;
-        float facingAngle;
+        public Transform _target;
+        public Transform _directionRotator;
+
+        NavMeshAgent _agent;
+        float _facingAngle;
+
+        public Vector3 _previousPosition;
 
         bool _canOnlyChangeDirection;
 
         #region PRIVATE METHODS
         void Start()
         {
-            agent = GetComponent<NavMeshAgent>();
+            _previousPosition = transform.position;
+            _directionRotator = transform.Find("DirectionRotator");
+            _agent = GetComponent<NavMeshAgent>();
             //target = GameObject.Find("Player").transform;
             //Set navMeshAgentSpeed
             //agent.destination = GameObject.Find("Player").transform.position;//target.position;
@@ -26,82 +32,83 @@ namespace Assets.Scripts.Managers.Movement
 
         void Update()
         {
-            if(TargetIsAvailable())
+            if (TargetIsAvailable())
             {
-                //facingDirection = GetFacingDirection();
+                _directionRotator.LookAt(_target.transform.position);
                 if (GetDistanceFromTarget() > 0.5f)
                 {
-                    agent.destination = target.position;
+                    _agent.destination = _target.position;
                 }
             }
             else
             {
                 Disable();
             }
-          
+
         }
 
         bool TargetIsAvailable()
         {
-            return target != null && target.gameObject.activeSelf;
+            return _target != null && _target.gameObject.activeSelf;
         }
         #endregion
+
         public DirectionEnum GetFacingDirection()
         {
-            facingAngle = transform.localEulerAngles.y;
-            facingAngle = (facingAngle > 180) ? facingAngle - 360 : facingAngle;
+            _facingAngle = _directionRotator.localEulerAngles.y;
+            _facingAngle = (_facingAngle > 180) ? _facingAngle - 360 : _facingAngle;
 
 
-            if(facingAngle < 0)
+            if (_facingAngle < 0)
             {
-                    if(facingAngle <= 0 && facingAngle >= -22.5f)
-                    {
-                        return DirectionEnum.Up;
-                    }
-
-                    if (facingAngle <= -22.5f && facingAngle >= -67.5f)
-                    {
-                        return DirectionEnum.UpLeft;
-                    }
-
-                    if (facingAngle <= -67.5f && facingAngle >= -112.5f)
-                    {
-                        return DirectionEnum.Left;
-                    }
-
-                    if (facingAngle <= -112.5f && facingAngle >= -157f)
-                    {
-                        return DirectionEnum.DownLeft;
-                    }
-
-                    if (facingAngle <= -157f && facingAngle >= -180f)
-                    {
-                        return DirectionEnum.Down;
-                    }
-            }
-            else
-            {
-                if (facingAngle >= 0 && facingAngle <= 22.5f)
+                if (_facingAngle <= 0 && _facingAngle >= -22.5f)
                 {
                     return DirectionEnum.Up;
                 }
 
-                if (facingAngle >= 22.5f && facingAngle <= 67.5f)
+                if (_facingAngle <= -22.5f && _facingAngle >= -67.5f)
+                {
+                    return DirectionEnum.UpLeft;
+                }
+
+                if (_facingAngle <= -67.5f && _facingAngle >= -112.5f)
+                {
+                    return DirectionEnum.Left;
+                }
+
+                if (_facingAngle <= -112.5f && _facingAngle >= -157f)
+                {
+                    return DirectionEnum.DownLeft;
+                }
+
+                if (_facingAngle <= -157f && _facingAngle >= -180f)
+                {
+                    return DirectionEnum.Down;
+                }
+            }
+            else
+            {
+                if (_facingAngle >= 0 && _facingAngle <= 22.5f)
+                {
+                    return DirectionEnum.Up;
+                }
+
+                if (_facingAngle >= 22.5f && _facingAngle <= 67.5f)
                 {
                     return DirectionEnum.UpRight;
                 }
 
-                if (facingAngle >= 67.5f && facingAngle <= 112.5f)
+                if (_facingAngle >= 67.5f && _facingAngle <= 112.5f)
                 {
                     return DirectionEnum.Right;
                 }
 
-                if (facingAngle >= 112.5f && facingAngle <= 157f)
+                if (_facingAngle >= 112.5f && _facingAngle <= 157f)
                 {
                     return DirectionEnum.DownRight;
                 }
 
-                if (facingAngle >= 157f && facingAngle <= 180f)
+                if (_facingAngle >= 157f && _facingAngle <= 180f)
                 {
                     return DirectionEnum.Down;
                 }
@@ -112,17 +119,23 @@ namespace Assets.Scripts.Managers.Movement
 
         public bool IsMoving()
         {
-            throw new NotImplementedException();
+            if (transform.position != _previousPosition)
+            {
+                _previousPosition = transform.position;
+                return true;
+            }
+
+            return false;
         }
 
         public float GetDistanceFromTarget()
         {
-            return Vector3.Distance(transform.position, target.position);
+            return Vector3.Distance(transform.position, _target.position);
         }
 
         public void SetTarget(GameObject target)
         {
-            this.target = target.transform;
+            this._target = target.transform;
         }
 
         public void SetCanChangeDirectionButNotMove(bool canOnlyChangeDirection)

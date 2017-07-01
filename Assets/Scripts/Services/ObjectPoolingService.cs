@@ -3,6 +3,7 @@ using System;
 using Assets.Scripts.Entities.ApplicationObjects;
 using UnityEngine;
 using Assets.Scripts.Managers.Movement;
+using Assets.Scripts.Interfaces.Managers.Components;
 
 namespace Assets.Scripts.Services
 {
@@ -28,7 +29,7 @@ namespace Assets.Scripts.Services
         public void KillAndPoolNpc(BaseAppObject obj)
         {
        
-            obj.ComponentsManager.DisableAllComponents();
+            obj.GetMonoBehaviourObject<IComponentsManager>().DisableAllComponents();
             obj.GameObject.SetActive(false);
             //Disable all component from object
 

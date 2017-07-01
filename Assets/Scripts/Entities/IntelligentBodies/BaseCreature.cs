@@ -1,8 +1,4 @@
-﻿using Assets.Scripts.Entities.ApplicationObjects;
-using Assets.Scripts.Entities.Itens.Equippable;
-using Assets.Scripts.Entities.Skills.Aggregators;
-using Assets.Scripts.Entities.Skills.Combat;
-using Assets.Scripts.Enums;
+﻿using Assets.Scripts.Entities.Skills.Aggregators;
 
 namespace Assets.Scripts.Entities.IntelligentBodies
 {

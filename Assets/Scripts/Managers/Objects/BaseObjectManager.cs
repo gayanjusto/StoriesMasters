@@ -1,11 +1,6 @@
-﻿using System;
-using Assets.Scripts.Entities;
-using Assets.Scripts.Entities.ApplicationObjects;
-using Assets.Scripts.Entities.IntelligentBodies;
+﻿using Assets.Scripts.Entities.IntelligentBodies;
 using Assets.Scripts.Interfaces.Factories;
-using Assets.Scripts.Interfaces.Managers.Objects;
 using Assets.Scripts.IoC;
-using Assets.Scripts.Factories;
 
 namespace Assets.Scripts.Managers.Objects
 {

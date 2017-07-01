@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Entities.ApplicationObjects;
 using Assets.Scripts.Entities.Itens.Equippable;
 using Assets.Scripts.Enums;
+using Assets.Scripts.Interfaces.Managers.Itens;
 using Assets.Scripts.Interfaces.Services;
 using System;
 using System.Collections.Generic;
@@ -14,9 +15,10 @@ namespace Assets.Scripts.Services
     {
         public void SetAttackTypeForPlayer(BaseAppObject playerObj, float inputHoldTime)
         {
-            if (playerObj.EquippedItensManager.GetEquippedWeapon() != null)
+            var playerEquipItensManager = playerObj.GetMonoBehaviourObject<IEquippedItensManager>();
+            if (playerEquipItensManager.GetEquippedWeapon() != null)
             {
-                BaseEquippableItem equippedWeapon = playerObj.EquippedItensManager.GetEquippedWeapon();
+                BaseEquippableItem equippedWeapon = playerEquipItensManager.GetEquippedWeapon();
 
                 //If player has hold for a heavy attack, it should pick the heaviest type of attack available for the weapon
                 if (inputHoldTime > 3)

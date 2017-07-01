@@ -56,7 +56,7 @@ namespace Assets.Scripts.Controllers
 
         public void StopMoving(BaseAppObject movingObj)
         {
-            movingObj.StaminaManager.SetDecreasingStamina(false);
+            movingObj.GetMonoBehaviourObject<IStaminaManager>().SetDecreasingStamina(false);
         }
 
         public void DisableMovement(GameObject movingObj)

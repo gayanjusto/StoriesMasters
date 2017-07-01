@@ -17,28 +17,9 @@ namespace Assets.Scripts.Entities.ApplicationObjects
 
         public NpcAppObject(
             GameObject gameObject,
-            Transform transform,
-            BaseCreature baseCreature,
-            IStaminaManager staminaManager,
-            ICombatManager combatManager,
-            IEquippedItensManager equippedItensManager,
-            IMovementManager movementManager,
-            IObjectManager objectManager,
-            ILineOfSightManager lineOfSightManager,
-            IComponentsManager componentsManager) : base 
+            BaseCreature baseCreature) : base 
             (
                 gameObject,
-                transform,
-                baseCreature,
-                staminaManager,
-                combatManager,
-                equippedItensManager,
-                movementManager,
-                objectManager,
-                componentsManager
-                )
-        {
-            LineOfSightManager = lineOfSightManager;
-        }
+                baseCreature){}
     }
 }

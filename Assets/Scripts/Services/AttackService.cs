@@ -11,6 +11,7 @@ using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Controllers;
 using Assets.Scripts.IoC;
 using Assets.Scripts.Interfaces.Managers.Movement;
+using Assets.Scripts.Interfaces.Managers.Combat;
 
 namespace Assets.Scripts.Services
 {
@@ -97,7 +98,7 @@ namespace Assets.Scripts.Services
             //Calculate chances of hitting target or if target has already blocked this attacker
             if (attackerObj.CanAttackTarget(target))
             {
-                var equippedWeapon = attackerObj.EquippedItensManager.GetEquippedWeapon();
+                var equippedWeapon = attackerObj.GetMonoBehaviourObject<IEquippedItensManager>().GetEquippedWeapon();
                 double damageDealtToTarget = attackerObj.GetDamageDealt(equippedWeapon);
 
                 target.ReceiveDamage(damageDealtToTarget);
@@ -119,7 +120,7 @@ namespace Assets.Scripts.Services
                 return null;
             }
 
-            double damageDealtToTarget = attackerObj.GetDamageDealt(attackerObj.EquippedItensManager.GetEquippedWeapon());
+            double damageDealtToTarget = attackerObj.GetDamageDealt(attackerObj.GetMonoBehaviourObject<IEquippedItensManager>().GetEquippedWeapon());
 
             List<BaseAppObject> creaturesHit = new List<BaseAppObject>();
             for (int i = 0; i < targetsObjs.Length; i++)
@@ -153,16 +154,18 @@ namespace Assets.Scripts.Services
 
         void DisableParryDefense(BaseAppObject defender)
         {
-            defender.CombatManager.SetHasCastAction(false);
-            defender.CombatManager.SetParryingTarget(null);
-            defender.CombatManager.SetIsAttemptingToParryAttack(false);
+            var defenderCombatManager = defender.GetMonoBehaviourObject<ICombatManager>();
+            defenderCombatManager.SetHasCastAction(false);
+            defenderCombatManager.SetParryingTarget(null);
+            defenderCombatManager.SetIsAttemptingToParryAttack(false);
 
         }
 
         bool CanAttackTarget(BaseAppObject target, BaseAppObject attacker)
         {
+            var targetCombatManager = target.GetMonoBehaviourObject<ICombatManager>();
             //Target has already defended the attack from this attacker
-            if (target.CombatManager.GetIsAttemptingToParry() && target.CombatManager.GetParryingTarget() == attacker)
+            if (targetCombatManager.GetIsAttemptingToParry() && targetCombatManager.GetParryingTarget() == attacker)
             {
                 Debug.Log("Blocked attack with parry");
 
@@ -171,14 +174,14 @@ namespace Assets.Scripts.Services
 
             //If is attacking a target that is parrying a different attacker, then this attacker will have
             //an instant success.
-            if (target.CombatManager.GetIsAttemptingToParry() && target.CombatManager.GetParryingTarget() != attacker)
+            if (targetCombatManager.GetIsAttemptingToParry() && targetCombatManager.GetParryingTarget() != attacker)
             {
                 Debug.Log(target.GameObject.name + " foi atacado por outro objeto e perdeu a defesa");
                 return true;
             }
 
             //Target is trying to block with a shield
-            if (target.CombatManager.GetIsBlockingWithShield())
+            if (targetCombatManager.GetIsBlockingWithShield())
             {
                 MiniStunTarget(target);
 
@@ -203,15 +206,16 @@ namespace Assets.Scripts.Services
             //Remove highlight of incoming attack for player
             _combatVisualInfoService.RemoveHighlightAttackerInformation(attackingObj);
 
+            var attackCombatManager = attackingObj.GetMonoBehaviourObject<ICombatManager>();
             //has already casted an attack, so it should be set to false
             //It's set to true in AttackObserver
-            attackingObj.CombatManager.SetIsAttacking(false);
+            attackCombatManager.SetIsAttacking(false);
 
             //Set delay after attack
             //REFACTOR: Get delay time based on attributes
-            attackingObj.CombatManager.DisableAttackerActions(2.0f);
+            attackCombatManager.DisableAttackerActions(2.0f);
 
-            var attackerTargets = attackingObj.CombatManager.GetTargets();
+            var attackerTargets = attackCombatManager.GetTargets();
 
             //Increase attack sequence
             // attackingObj.CombatManager.IncreaseSequenceWaitForAction();
@@ -265,13 +269,13 @@ namespace Assets.Scripts.Services
 
         public void MiniStunTarget(BaseAppObject target)
         {
-            target.CombatManager.DisableAttackerActions(2.5f);
+            target.GetMonoBehaviourObject<ICombatManager>().DisableAttackerActions(2.5f);
             target.HasActionsPrevented = true;
         }
 
         public void MiniStunTarget(BaseAppObject target, float timeToStun)
         {
-            target.CombatManager.DisableAttackerActions(timeToStun);
+            target.GetMonoBehaviourObject<ICombatManager>().DisableAttackerActions(timeToStun);
         }
 
         public float GetTimeForAttackDelay(BaseAppObject target)
@@ -283,7 +287,8 @@ namespace Assets.Scripts.Services
         public bool AttackIsPastHalfWay(BaseAppObject attacker)
         {
             //attack has spend more than half of the total of the swing/freeze time
-            return attacker.CombatManager.GetCurrentTimeForAttackDelay() < (attacker.CombatManager.GetTotalFreezeTime() / 2);
+            var attackerCombatManager = attacker.GetMonoBehaviourObject<ICombatManager>();
+            return attackerCombatManager.GetCurrentTimeForAttackDelay() < (attackerCombatManager.GetTotalFreezeTime() / 2);
         }
     }
 }

@@ -15,26 +15,10 @@ namespace Assets.Scripts.Factories
     {
         public static PlayerAppObject Create(GameObject gameObject, BaseCreature baseCreature)
         {
-            IStaminaManager staminaManager = gameObject.GetComponent<IStaminaManager>();
-            ICombatManager combatManager = gameObject.GetComponent<ICombatManager>();
-            IEquippedItensManager equippedItensManager = gameObject.GetComponent<IEquippedItensManager>();
-            IMovementManager movementManager = gameObject.GetComponent<IMovementManager>();
-            IObjectManager objectManager = gameObject.GetComponent<IObjectManager>();
-            IPlayerCombatInputManager playerCombatInputManager = gameObject.GetComponent<IPlayerCombatInputManager>();
-            IComponentsManager componentsManager = gameObject.GetComponent<IComponentsManager>();
-
 
             PlayerAppObject playerAppObj = new PlayerAppObject(
                 gameObject,
-                gameObject.transform,
-                baseCreature,
-                staminaManager,
-                combatManager,
-                equippedItensManager,
-                movementManager,
-                objectManager,
-                playerCombatInputManager,
-                componentsManager);
+                baseCreature);
 
             return playerAppObj;
         }

@@ -9,6 +9,7 @@ using Assets.Scripts.IoC;
 using Assets.Scripts.Managers.Movement;
 using UnityEngine;
 using Assets.Scripts.Interfaces.Managers.Combat;
+using Assets.Scripts.Interfaces.Managers.Attributes;
 
 namespace Assets.Scripts.Managers.Inputs
 {
@@ -21,6 +22,8 @@ namespace Assets.Scripts.Managers.Inputs
         private IDirectionService _directionService;
         private ICombatManager _combatManager;
         private IMovementService _movementService;
+        private IStaminaManager _staminaManager;
+
 
         public DirectionEnum _verticalDirection;
         public DirectionEnum _horizontalDirection;
@@ -36,8 +39,11 @@ namespace Assets.Scripts.Managers.Inputs
         {
             _objectManager = GetComponent<IObjectManager>();
             _combatManager = GetComponent<ICombatManager>();
+            _staminaManager = GetComponent<IStaminaManager>();
+
             _directionService = IoCContainer.GetImplementation<IDirectionService>();
             _movementService = IoCContainer.GetImplementation<IMovementService>();
+
         }
 
         void FixedUpdate()
@@ -58,9 +64,9 @@ namespace Assets.Scripts.Managers.Inputs
             else
             {
                 //If it's not moving, should not lose stamina
-                if (_objectManager.GetBaseAppObject().StaminaManager.IsEnabled())
+                if (_staminaManager.IsEnabled())
                 {
-                    _objectManager.GetBaseAppObject().StaminaManager.SetDecreasingStamina(false);
+                    _staminaManager.SetDecreasingStamina(false);
                 }
             }
         }

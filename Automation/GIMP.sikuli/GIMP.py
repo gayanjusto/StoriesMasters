@@ -9,15 +9,15 @@ partitionLocation = Location(418, 470)
 fileLocationRegion = Region(354,234,342,35)
 fileLocationPathLocation = Location(474, 254)
 
-gimpImageRegion = Region(763,413,72,67)
-bodyPartsHiddenMaterialLocation = Location(796, 425)
-headHiddenMaterialLocation = Location(796, 445)
+gimpImageRegion = Region(714,429,68,73)
+bodyPartsHiddenMaterialLocation = Location(743, 442)
+headHiddenMaterialLocation = Location(744, 457)
 
-basePathToImages = "F:\\Projetos\\StoriesMasters\\2D Assets\\CombatWalking\\Player"
+basePathToImages = "F:\\Projetos\\StoriesMasters\\2D Assets\\\SwingAttack_1\\Player"
 
 bodyParts = ["Head", "Arms", "Hands", "Torso", "Legs", "Feet"]
 angles = ["a1", "a2","a3","a4","a5","a6","a7","a8"]
-frames = [0,1,2,3,4,5,6,7,8,9]
+frames = [0,1,2,3,4,5,6]
 
 amountImg = 0
 for bodyPartIndex in range(len(bodyParts)):

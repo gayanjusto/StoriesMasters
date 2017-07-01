@@ -130,9 +130,11 @@ namespace Assets.Scripts.Managers.Combat
 
         public virtual void DisableAttackerActions(float freezeTime)
         {
+            //DEBUG
+            //Remover
             //Set color for freezing
-            SpriteRenderer spriteRenderer = transform.FindChild("SpriteRenderer").GetComponent<SpriteRenderer>();
-            spriteRenderer.color = Color.blue;
+            //SpriteRenderer spriteRenderer = transform.FindChild("SpriteRenderer").GetComponent<SpriteRenderer>();
+            //spriteRenderer.color = Color.blue;
 
             //Keep the amount of time the object will wait
             _freezeTickTime = freezeTime;

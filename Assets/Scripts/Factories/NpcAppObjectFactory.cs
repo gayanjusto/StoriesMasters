@@ -15,25 +15,9 @@ namespace Assets.Scripts.Factories
     {
         public static NpcAppObject Create(GameObject gameObject, BaseCreature baseCreature)
         {
-            IStaminaManager staminaManager = gameObject.GetComponent<IStaminaManager>();
-            ICombatManager combatManager = gameObject.GetComponent<ICombatManager>();
-            IEquippedItensManager equippedItensManager = gameObject.GetComponent<IEquippedItensManager>();
-            IMovementManager movementManager = gameObject.GetComponent<IMovementManager>();
-            IObjectManager objectManager = gameObject.GetComponent<IObjectManager>();
-            ILineOfSightManager lineOfSightManager = gameObject.GetComponent<ILineOfSightManager>();
-            IComponentsManager componentsManager = gameObject.GetComponent<IComponentsManager>();
-
             NpcAppObject npcAppObj = new NpcAppObject(
                 gameObject,
-                gameObject.transform,
-                baseCreature,
-                staminaManager,
-                combatManager,
-                equippedItensManager,
-                movementManager,
-                objectManager,
-                lineOfSightManager,
-                componentsManager);
+                baseCreature);
 
             return npcAppObj;
         }
