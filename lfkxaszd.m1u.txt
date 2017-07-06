@@ -1,0 +1,126 @@
+﻿
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Your branch is up-to-date with 'origin/master'.
+#
+# Changes to be committed:
+#	modified:   2D Assets/Mocks/AnimationMocks.xcf
+#	modified:   Assets/Animators/Npc/NpcAnimatorController.controller
+#	modified:   Assets/Animators/Npc/NpcAnimatorController.controller.meta
+#	modified:   Assets/Animators/Player/armsPlayerAnimatorController.controller
+#	modified:   Assets/Animators/Player/armsPlayerAnimatorController.controller.meta
+#	deleted:    Assets/Animators/PlayerArmsPlayerAnimatorController.controller
+#	deleted:    Assets/Animators/PlayerArmsPlayerAnimatorController.controller.meta
+#	modified:   Assets/Scenes/TestingScene.unity
+#	modified:   Assets/Scripts/Entities/ApplicationObjects/BaseAppObject.cs
+#	modified:   Assets/Scripts/Entities/Itens/Equippable/BaseEquippableItem.cs
+#	modified:   Assets/Scripts/Enums/AttackTypeEnum.cs
+#	modified:   Assets/Scripts/Enums/DefenseTypeEnum.cs
+#	modified:   Assets/Scripts/Factories/AnimatorControllers/BaseAnimatorControllerAbstractFactory.cs
+#	modified:   Assets/Scripts/Factories/AnimatorControllers/NPC/NpcAnimatorControllerFactory.cs
+#	modified:   Assets/Scripts/Factories/AnimatorControllers/Player/PlayerAnimatorControllerAbstractFactory.cs
+#	deleted:    Assets/Scripts/Interfaces/Managers/Combat/IAttackTiming.cs
+#	deleted:    Assets/Scripts/Interfaces/Managers/Combat/IAttackTiming.cs.meta
+#	modified:   Assets/Scripts/Interfaces/Managers/Combat/ICombatManager.cs
+#	modified:   Assets/Scripts/Interfaces/Managers/Combat/INpcTargetingManager.cs
+#	deleted:    Assets/Scripts/Interfaces/Services/IAttackService.cs
+#	deleted:    Assets/Scripts/Interfaces/Services/IAttackService.cs.meta
+#	deleted:    Assets/Scripts/Interfaces/Services/IAttackTargetService.cs
+#	deleted:    Assets/Scripts/Interfaces/Services/IAttackTargetService.cs.meta
+#	deleted:    Assets/Scripts/Interfaces/Services/IAttackTypeService.cs
+#	deleted:    Assets/Scripts/Interfaces/Services/IAttackTypeService.cs.meta
+#	deleted:    Assets/Scripts/Interfaces/Services/ICombatVisualInformationService.cs
+#	deleted:    Assets/Scripts/Interfaces/Services/ICombatVisualInformationService.cs.meta
+#	deleted:    Assets/Scripts/Interfaces/Services/ITargetService.cs
+#	deleted:    Assets/Scripts/Interfaces/Services/ITargetService.cs.meta
+#	modified:   Assets/Scripts/IoC/IoCBootstrapper.cs
+#	modified:   Assets/Scripts/Managers/Animation/BaseAnimationManager.cs
+#	modified:   Assets/Scripts/Managers/Animation/PlayerAnimationManager.cs
+#	modified:   Assets/Scripts/Managers/Behaviour/LineOfSightManager.cs
+#	modified:   Assets/Scripts/Managers/Combat/BaseCombatManager.cs
+#	modified:   Assets/Scripts/Managers/Combat/CombatEntryPointManager.cs
+#	deleted:    Assets/Scripts/Managers/Combat/NpcTargetingManager.cs
+#	deleted:    Assets/Scripts/Managers/Combat/NpcTargetingManager.cs.meta
+#	modified:   Assets/Scripts/Managers/Components/NpcComponentsManager.cs
+#	modified:   Assets/Scripts/Managers/Inputs/PlayerMovementInputManager.cs
+#	modified:   Assets/Scripts/Managers/Itens/EquippedItensManager.cs
+#	modified:   Assets/Scripts/Managers/Movement/NpcMovementManager.cs
+#	modified:   Assets/Scripts/Observers/MovementObserver.cs
+#	deleted:    Assets/Scripts/Services/AttackService.cs
+#	deleted:    Assets/Scripts/Services/AttackService.cs.meta
+#	deleted:    Assets/Scripts/Services/AttackTargetService.cs
+#	deleted:    Assets/Scripts/Services/AttackTargetService.cs.meta
+#	deleted:    Assets/Scripts/Services/AttackTypeService.cs
+#	deleted:    Assets/Scripts/Services/AttackTypeService.cs.meta
+#	deleted:    Assets/Scripts/Services/CombatVisualInformationService.cs
+#	deleted:    Assets/Scripts/Services/CombatVisualInformationService.cs.meta
+#	deleted:    Assets/Scripts/Services/TargetService.cs
+#	deleted:    Assets/Scripts/Services/TargetService.cs.meta
+#
+# Untracked files:
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_1_down.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_1_downleft.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_1_downright.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_1_left.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_1_right.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_1_up.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_1_upleft.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_1_upright.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_2_down.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_2_downleft.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_2_downright.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_2_left.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_2_right.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_2_up.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_2_upleft.aseprite
+#	2D Assets/Mocks/Attack/swing/attack_swing_1H_2_upright.aseprite
+#	2D Assets/Mocks/Attack/thrust/attack_thrust_1_down.aseprite
+#	2D Assets/Mocks/Attack/thrust/attack_thrust_1_downleft.aseprite
+#	2D Assets/Mocks/Attack/thrust/attack_thrust_1_downright.aseprite
+#	2D Assets/Mocks/Attack/thrust/attack_thrust_1_left.aseprite
+#	2D Assets/Mocks/Attack/thrust/attack_thrust_1_right.aseprite
+#	2D Assets/Mocks/Attack/thrust/attack_thrust_1_up.aseprite
+#	2D Assets/Mocks/Attack/thrust/attack_thrust_1_upleft.aseprite
+#	2D Assets/Mocks/Attack/thrust/attack_thrust_1_upright.aseprite
+#	2D Assets/Mocks/Block/block_down.aseprite
+#	2D Assets/Mocks/Block/block_downleft.aseprite
+#	2D Assets/Mocks/Block/block_downright.aseprite
+#	2D Assets/Mocks/Block/block_left.aseprite
+#	2D Assets/Mocks/Block/block_right.aseprite
+#	2D Assets/Mocks/Block/block_up.aseprite
+#	2D Assets/Mocks/Block/block_upleft.aseprite
+#	2D Assets/Mocks/Block/block_upright.aseprite
+#	2D Assets/Mocks/Parry/parry_down.aseprite
+#	2D Assets/Mocks/Parry/parry_downleft.aseprite
+#	2D Assets/Mocks/Parry/parry_downright.aseprite
+#	2D Assets/Mocks/Parry/parry_left.aseprite
+#	2D Assets/Mocks/Parry/parry_right.aseprite
+#	2D Assets/Mocks/Parry/parry_up.aseprite
+#	2D Assets/Mocks/Parry/parry_upleft.aseprite
+#	2D Assets/Mocks/Parry/parry_upright.aseprite
+#	2D Assets/Mocks/ShieldRecover/
+#	Assets/Resources/Animations/Mocks.meta
+#	Assets/Resources/Animations/Mocks/
+#	Assets/Scripts/Interfaces/Managers/Animation.meta
+#	Assets/Scripts/Interfaces/Managers/Animation/
+#	Assets/Scripts/Interfaces/Managers/Combat/IAttackSequenceManager.cs
+#	Assets/Scripts/Interfaces/Managers/Combat/IAttackSequenceManager.cs.meta
+#	Assets/Scripts/Interfaces/Managers/Combat/IAttackStatusManager.cs
+#	Assets/Scripts/Interfaces/Managers/Combat/IAttackStatusManager.cs.meta
+#	Assets/Scripts/Interfaces/Managers/Combat/IAttackTimingManager.cs
+#	Assets/Scripts/Interfaces/Managers/Combat/IAttackTimingManager.cs.meta
+#	Assets/Scripts/Interfaces/Managers/Combat/IDefenseStatusManager.cs
+#	Assets/Scripts/Interfaces/Managers/Combat/IDefenseStatusManager.cs.meta
+#	Assets/Scripts/Interfaces/Services/Combat.meta
+#	Assets/Scripts/Interfaces/Services/Combat/
+#	Assets/Scripts/Managers/Combat/NpcAttackManager.cs
+#	Assets/Scripts/Managers/Combat/NpcAttackManager.cs.meta
+#	Assets/Scripts/Services/Combat.meta
+#	Assets/Scripts/Services/Combat/
+#	Assets/Scripts/Structs.meta
+#	Assets/Scripts/Structs/
+#	Assets/Spritesheets/Characters/Mocks.meta
+#	Assets/Spritesheets/Characters/Mocks/
+#
+

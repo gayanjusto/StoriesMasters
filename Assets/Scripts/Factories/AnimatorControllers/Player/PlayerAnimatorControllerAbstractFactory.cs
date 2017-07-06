@@ -16,7 +16,7 @@ namespace Assets.Scripts.Factories.AnimatorControllers
         {
             var animationsList = new List<Motion>();
 
-            foreach (var subStateMachineName in mainSubStates)
+            foreach (var subStateMachineName in _standardSubStates)
             {
                 var animations = GetMotionClipsByBodyPart(subStateMachineName, bodyPart);
 
@@ -26,6 +26,8 @@ namespace Assets.Scripts.Factories.AnimatorControllers
                 }
             }
 
+            //DEBUG
+            animationsList.AddRange(base.GetMockClips());
             return animationsList;
         }
 
@@ -38,8 +40,8 @@ namespace Assets.Scripts.Factories.AnimatorControllers
 
         protected override void GenerateAnimations(string controllerName, List<Motion> motionClips)
         {
-            base.currentControllersPath = string.Format("{0}/{1}", baseControllersPath, "Player");
-            base.sufixControllerName = "PlayerAnimatorController";
+            base._currentControllersPath = string.Format("{0}/{1}", baseControllersPath, "Player/");
+            base._sufixControllerName = "PlayerAnimatorController";
 
             base.GenerateAnimations(controllerName, motionClips);
         }

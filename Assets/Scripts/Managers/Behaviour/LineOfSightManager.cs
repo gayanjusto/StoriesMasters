@@ -8,14 +8,14 @@ namespace Assets.Scripts.Managers.Behaviour
 {
     public class LineOfSightManager : BaseMonoBehaviour, ILineOfSightManager
     {
-        INpcTargetingManager _npcTargetingManager;
+        INpcAttackManager _npcTargetingManager;
         INpcMovementManager _npcMovementManager;
         INpcCombatManager _npcCombatManager;
         INpcFacingDirectionManager _npcFacingDirectionManager;
 
         private void Start()
         {
-            _npcTargetingManager = transform.parent.GetComponent<INpcTargetingManager>();
+            _npcTargetingManager = transform.parent.GetComponent<INpcAttackManager>();
             _npcMovementManager = transform.parent.GetComponent<INpcMovementManager>();
             _npcCombatManager = transform.parent.GetComponent<INpcCombatManager>();
             _npcFacingDirectionManager = transform.parent.GetComponent<INpcFacingDirectionManager>();
@@ -33,6 +33,8 @@ namespace Assets.Scripts.Managers.Behaviour
                 _npcCombatManager.Enable();
                 _npcFacingDirectionManager.Enable();
                 _npcFacingDirectionManager.SetCurrentFacingTarget(other.gameObject.transform);
+
+                _npcCombatManager.SetCombatActive(true);
             }
         }
   

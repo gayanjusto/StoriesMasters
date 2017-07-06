@@ -35,7 +35,9 @@ namespace Assets.Scripts.IoC
             IoCContainer.Register<IMovementService, MovementService>(IoCLifeCycleEnum.Singleton);
             IoCContainer.Register<IObjectPoolingService, ObjectPoolingService>(IoCLifeCycleEnum.Singleton);
 
-            
+            IoCContainer.Register<IAttackSequenceService, AttackSequenceService>(IoCLifeCycleEnum.Singleton);
+
+
             //Controllers
             IoCContainer.Register<IMovementController, MovementController>(IoCLifeCycleEnum.Singleton);
         }

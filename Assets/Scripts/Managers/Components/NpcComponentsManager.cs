@@ -25,7 +25,7 @@ namespace Assets.Scripts.Managers.Components
         {
             BaseMonoBehaviour[] _components = new BaseMonoBehaviour[9];
             _components[0] = gameObject.GetComponent<NpcCombatManager>();
-            _components[1] = gameObject.GetComponent<NpcTargetingManager>();
+            _components[1] = gameObject.GetComponent<NpcAttackManager>();
             _components[2] = gameObject.GetComponent<NpcMovementManager>();
             _components[3] = gameObject.GetComponent<EquippedItensManager>();
             _components[4] = gameObject.GetComponent<NpcObjectManager>();
@@ -49,9 +49,9 @@ namespace Assets.Scripts.Managers.Components
                 gameObject.AddComponent<NpcCombatManager>();
             }
 
-            if (gameObject.GetComponent<INpcTargetingManager>() == null)
+            if (gameObject.GetComponent<INpcAttackManager>() == null)
             {
-                gameObject.AddComponent<NpcTargetingManager>();
+                gameObject.AddComponent<NpcAttackManager>();
             }
 
             if (gameObject.GetComponent<IMovementManager>() == null)

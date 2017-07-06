@@ -10,6 +10,9 @@ using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Managers.Movement;
 using Assets.Scripts.Interfaces.Observers;
 using Assets.Scripts.Interfaces.Services;
+using Assets.Scripts.Constants;
+using Assets.Scripts.Structs.Combat;
+using Assets.Scripts.Interfaces.Managers;
 
 namespace Assets.Scripts.Managers.Combat
 {
@@ -24,6 +27,8 @@ namespace Assets.Scripts.Managers.Combat
         public BaseAppObject[] _lockedAttacktargets;
         public bool _isAttacking;
         public BaseAppObject _parryingTarget;
+        public DateTime? _lastAttackTime;
+        public bool _isCombatActive;
 
         //Player or NPC has set targets and ready for attack
         //Variable will be read by AttackObserver
@@ -40,14 +45,19 @@ namespace Assets.Scripts.Managers.Combat
         /// </summary>
         public bool _isBlockingWithShield;
 
+        public AttackTypeEnum _currentAttackType;
+
         protected BaseAppObject _appObject;
         protected IMovementController _movementController;
 
         protected IObjectManager _objectManager;
+        protected IBaseAnimationManager _baseAnimationManager;
+
 
         protected IAttackService _attackService;
         protected IAttackTargetService _attackTargetService;
         protected IDirectionService _directionService;
+        protected IAttackSequenceService _attackSequenceService;
 
         #region PRIVATE METHODS
         void Start()
@@ -55,11 +65,12 @@ namespace Assets.Scripts.Managers.Combat
             _movementController = IoCContainer.GetImplementation<IMovementController>();
 
             _appObject = GetComponent<IObjectManager>().GetBaseAppObject();
+            _baseAnimationManager = GetComponent<IBaseAnimationManager>();
 
             _attackService = IoCContainer.GetImplementation<IAttackService>();
             _attackTargetService = IoCContainer.GetImplementation<IAttackTargetService>();
             _directionService = IoCContainer.GetImplementation<IDirectionService>();
-
+            _attackSequenceService = IoCContainer.GetImplementation<IAttackSequenceService>();
         }
 
         protected void WaitForActionDelay()
@@ -128,7 +139,7 @@ namespace Assets.Scripts.Managers.Combat
             GetComponent<IMovementManager>().Disable();
         }
 
-        public virtual void DisableAttackerActions(float freezeTime)
+        public virtual void SetRecoverTimeFromAttack(float freezeTime)
         {
             //DEBUG
             //Remover
@@ -146,7 +157,7 @@ namespace Assets.Scripts.Managers.Combat
 
    
 
-        public int GetAttackSequence()
+        public int AttackSequence()
         {
             return _attackSequence;
         }
@@ -177,17 +188,17 @@ namespace Assets.Scripts.Managers.Combat
             _isAttacking = isAttacking;
         }
 
-        public bool GetIsAttacking()
+        public bool IsAttacking()
         {
             return _isAttacking;
         }
 
-        public bool GetIsAttemptingToParry()
+        public bool IsAttemptingToParry()
         {
             return _isAttemptingToParry;
         }
 
-        public bool GetIsBlockingWithShield()
+        public bool IsBlockingWithShield()
         {
             return _isBlockingWithShield;
         }
@@ -229,14 +240,19 @@ namespace Assets.Scripts.Managers.Combat
                 _lockedAttacktargets = _attackTargetService.GetTargetsForAttack(_appObject);
                 Debug.Log(_lockedAttacktargets);
 
-                if(_lockedAttacktargets == null)
+                if(transform.tag != Tags.PlayerTag && _lockedAttacktargets == null)
                 {
                     return;
                 }
 
+                AttackSequenceDelay attackSequenceDelay = _attackSequenceService.GetNextAttackSequence(_appObject);
+                _attackSequence = attackSequenceDelay.nextAttackSequence;
+                
                 //Get time to disable actions while is casting attack
-                float attackDelayTime = _attackService.GetTimeForAttackDelay(_appObject);
-                DisableAttackerActions(attackDelayTime);
+                float attackDelayTime = _attackService.GetTimeForAttackDelay(_appObject) + attackSequenceDelay.delayTime;
+                _lastAttackTime = DateTime.Now;
+
+                SetRecoverTimeFromAttack(attackDelayTime);
                 Debug.Log("Attack delay time: " + attackDelayTime);
 
                 //AttackObserver will read status and cast Attack if possible
@@ -284,6 +300,56 @@ namespace Assets.Scripts.Managers.Combat
         {
             //REFACTOR: this boolean should return the condition of whether a defender can parry or not, using his skills against the opponent
             _isAttemptingToParry = isAttemptingToParry;
+        }
+
+        public DefenseTypeEnum CurrentDefenseType()
+        {
+            if (_isBlockingWithShield)
+            {
+                return DefenseTypeEnum.ShieldBlock;
+            }
+
+            if (_isAttemptingToParry)
+            {
+                return DefenseTypeEnum.ParryBlock;
+            }
+
+            return DefenseTypeEnum.Dodge;
+        }
+
+        public bool IsDefending()
+        {
+            return _isBlockingWithShield || _isAttemptingToParry;
+        }
+
+        public void SetAttackType(AttackTypeEnum attackType)
+        {
+            _currentAttackType = attackType;
+        }
+
+        public AttackTypeEnum CurrentAttackType()
+        {
+            return _currentAttackType;
+        }
+
+        public DateTime? LastAttackTime()
+        {
+            return _lastAttackTime;
+        }
+
+        public void RecoverFromAttack(float delayTime)
+        {
+            SetRecoverTimeFromAttack(delayTime);
+        }
+
+        public void SetCombatActive(bool combatActive)
+        {
+            _isCombatActive = combatActive;
+        }
+
+        public bool IsCombatActive()
+        {
+            return _isCombatActive;
         }
     }
 }

@@ -49,7 +49,7 @@ namespace Assets.Scripts.Observers
 
         bool IsShieldBlocking()
         {
-            return _combatManager.GetIsBlockingWithShield();
+            return _combatManager.IsBlockingWithShield();
         }
     }
 }

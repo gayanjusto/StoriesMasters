@@ -46,20 +46,20 @@ namespace Assets.Scripts.Entities.ApplicationObjects
         //Determines whether object can make any action or not
         public bool HasActionsPrevented { get; set; }
 
-        public AttackTypeEnum GetAttackTypeForEquippedWeapon()
-        {
-            //DEBUG
-            //Remove (TESTS ONLY)
-            return AttackTypeEnum.Stock;
+        //public AttackTypeEnum GetAttackTypeForEquippedWeapon()
+        //{
+        //    //DEBUG
+        //    //Remove (TESTS ONLY)
+        //    return AttackTypeEnum.AttackThrust;
 
-            var equippedItensManager = GetMonoBehaviourObject<IEquippedItensManager>();
+        //    var equippedItensManager = GetMonoBehaviourObject<IEquippedItensManager>();
 
-            if (equippedItensManager.GetEquippedWeapon() == null)
-            {
-                return AttackTypeEnum.Stock;
-            }
-            return equippedItensManager.GetEquippedWeapon().CurrentAttackType;
-        }
+        //    if (equippedItensManager.GetEquippedWeapon() == null)
+        //    {
+        //        return AttackTypeEnum.AttackThrust;
+        //    }
+        //    return equippedItensManager.GetEquippedWeapon().CurrentAttackType;
+        //}
 
         public float IncreaseCombatSkillPoint()
         {
@@ -132,7 +132,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             double skillValue = BaseCreature.CombatSkills.GetSkillValueByName(equippedWeapon.SkillUsed);
             System.Random rnd = new System.Random();
 
-            if (equippedWeapon.AttacksType.All(x => x != AttackTypeEnum.QuickRanged && x != AttackTypeEnum.LongRanged))
+            if (equippedWeapon.AttacksType.All(x => x != AttackTypeEnum.Ranged))
             {
                 return (BaseCreature.Strength + BaseCreature.Intelligence + equippedWeapon.Damage + skillValue + rnd.Next(0, 100)) / 5;
             }
@@ -157,7 +157,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
         public float GetAttackValue()
         {
             float skillValue = GetCombatSkillByWeapon().SkillValue;
-            int abilityBuffValue = GetMonoBehaviourObject<IEquippedItensManager>().GetEquippedWeapon().AttacksType.Any(x => x == AttackTypeEnum.QuickRanged || x == AttackTypeEnum.LongRanged) ? BaseCreature.Dexterity : BaseCreature.Strength;
+            int abilityBuffValue = GetMonoBehaviourObject<IEquippedItensManager>().GetEquippedWeapon().AttacksType.Any(x => x == AttackTypeEnum.Ranged) ? BaseCreature.Dexterity : BaseCreature.Strength;
 
             return (skillValue * BaseCreature.Intelligence) / 2;
         }
@@ -167,7 +167,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             BaseCombatSkill defenderCombatSkill = null;
 
             //Is blocking with shield
-            if (defenseType == DefenseTypeEnum.Block)
+            if (defenseType == DefenseTypeEnum.ShieldBlock)
             {
                 EquippableItemTypeEnum defenderWeaponType = GetMonoBehaviourObject<IEquippedItensManager>().GetEquippedWeapon().ItemType;
                 if (defenderWeaponType == EquippableItemTypeEnum.Shield)
@@ -199,7 +199,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
 
             var targetCombatManager = target.GetMonoBehaviourObject<ICombatManager>();
             //Target has already defended the attack from this attacker
-            if (targetCombatManager.GetIsAttemptingToParry() && targetCombatManager.GetParryingTarget() == this)
+            if (targetCombatManager.IsAttemptingToParry() && targetCombatManager.GetParryingTarget() == this)
             {
                 //Target has defended, so it should be set to false
                 targetCombatManager.SetIsAttemptingToParryAttack(false);
@@ -210,7 +210,7 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             }
             //If is attacking a target that is parrying a different attacker, then this attacker will have
             //an instant success.
-            else if (targetCombatManager.GetIsAttemptingToParry() && targetCombatManager.GetParryingTarget() != this)
+            else if (targetCombatManager.IsAttemptingToParry() && targetCombatManager.GetParryingTarget() != this)
             {
                 //Target has received an attack and is not defending anymore
                 targetCombatManager.SetIsAttemptingToParryAttack(false);
@@ -224,12 +224,12 @@ namespace Assets.Scripts.Entities.ApplicationObjects
             attackService.MiniStunTarget(target);
 
             //Target is trying to block with a shield
-            if (targetCombatManager.GetIsBlockingWithShield())
+            if (targetCombatManager.IsBlockingWithShield())
             {
                 if (attackService.TargetIsBlockingAttackerDirectionsWithShield(this, target))
                 {
                     Debug.Log(target.GameObject.name + " is trying to block with shield");
-                    return target.DefendAttack(this, DefenseTypeEnum.Block);
+                    return target.DefendAttack(this, DefenseTypeEnum.ShieldBlock);
                 }
                 else //Target is not blocking attacker direction resulting in Instant hit
                 {

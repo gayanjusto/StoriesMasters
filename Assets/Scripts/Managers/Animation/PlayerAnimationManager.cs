@@ -1,16 +1,17 @@
-﻿using Assets.Scripts.Interfaces.Managers.Movement;
+﻿using Assets.Scripts.Factories.AnimatorControllers;
+using Assets.Scripts.Interfaces.Managers.Movement;
 using Assets.Scripts.Managers.Animation;
 using UnityEngine;
 
 public class PlayerAnimationManager : BaseAnimationManager
 {
 
-    Animator _torsoAnimatorController;
+    //Animator _torsoAnimatorController;
     Animator _armsAnimatorController;
-    Animator _headAnimatorController;
-    Animator _handsAnimatorController;
-    Animator _legsAnimatorController;
-    Animator _feetAnimatorController;
+    //Animator _headAnimatorController;
+    //Animator _handsAnimatorController;
+    //Animator _legsAnimatorController;
+    //Animator _feetAnimatorController;
 
  
 
@@ -33,25 +34,25 @@ public class PlayerAnimationManager : BaseAnimationManager
 
         base._animationRender = transform.Find("AnimationRender");
 
-        _animators = new Animator[6];
+        _animators = new Animator[1];
 
-        _torsoAnimatorController = _animationRender.Find("Torso").GetComponent<Animator>();
-        _animators[0] = _torsoAnimatorController;
+        //_torsoAnimatorController = _animationRender.Find("Torso").GetComponent<Animator>();
+        //_animators[0] = _torsoAnimatorController;
 
-        _handsAnimatorController = _animationRender.Find("Hands").GetComponent<Animator>();
-        _animators[1] = _handsAnimatorController;
+        //_handsAnimatorController = _animationRender.Find("Hands").GetComponent<Animator>();
+        //_animators[1] = _handsAnimatorController;
 
         _armsAnimatorController = _animationRender.Find("Arms").GetComponent<Animator>();
-        _animators[2] = _armsAnimatorController;
+        _animators[0] = _armsAnimatorController;
 
-        _headAnimatorController = _animationRender.Find("Head").GetComponent<Animator>();
-        _animators[3] = _headAnimatorController;
+        //_headAnimatorController = _animationRender.Find("Head").GetComponent<Animator>();
+        //_animators[3] = _headAnimatorController;
 
-        _legsAnimatorController = _animationRender.Find("Legs").GetComponent<Animator>();
-        _animators[4] = _legsAnimatorController;
+        //_legsAnimatorController = _animationRender.Find("Legs").GetComponent<Animator>();
+        //_animators[4] = _legsAnimatorController;
 
-        _feetAnimatorController = _animationRender.Find("Feet").GetComponent<Animator>();
-        _animators[5] = _feetAnimatorController;
+        //_feetAnimatorController = _animationRender.Find("Feet").GetComponent<Animator>();
+        //_animators[5] = _feetAnimatorController;
 
         base.Start();
     }

@@ -55,7 +55,7 @@ namespace Assets.Scripts.Managers.Combat
             }
 
             //If target is not attacking, there's nothing to parry
-            if (!target.GetMonoBehaviourObject<ICombatManager>().GetIsAttacking())
+            if (!target.GetMonoBehaviourObject<ICombatManager>().IsAttacking())
             {
                 SetDelayAfterFailedParryAttempt();
                 return false;

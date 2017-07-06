@@ -17,7 +17,7 @@ namespace Assets.Scripts.Managers.Itens
                 Weight = 2.0,
                 Damage = 40,
                 SkillUsed = "SwordsSkill",
-                AttacksType = new[] { AttackTypeEnum.Swing, AttackTypeEnum.Stock },
+                AttacksType = new[] { AttackTypeEnum.AttackSwing, AttackTypeEnum.AttackThrust },
                 ItemType = EquippableItemTypeEnum.Weapon,
                 WeaponRange = 2.5f
             };

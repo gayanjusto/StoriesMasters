@@ -14,9 +14,5 @@ namespace Assets.Scripts.Entities.Itens.Equippable
         public AttackTypeEnum[] AttacksType{ get; set; }
         public string SkillUsed { get; set; }
         public EquippableItemTypeEnum ItemType { get; set; }
-
-        public AttackTypeEnum CurrentAttackType { get; set; }
-
-       
     }
 }

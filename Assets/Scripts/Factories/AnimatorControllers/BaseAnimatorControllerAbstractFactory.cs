@@ -10,19 +10,28 @@ namespace Assets.Scripts.Factories.AnimatorControllers
     public abstract class BaseAnimatorControllerAbstractFactory
     {
         protected const string baseControllersPath = "Assets/Animators";
-        protected string currentControllersPath;
-        protected string sufixControllerName;
+        protected string _currentControllersPath;
+        protected string _sufixControllerName;
 
-        protected List<AnimatorStateMachine> AnimatorSubStateMachines { get; set; }
-        protected AnimatorStateMachine rootStateMachine;
-        protected IEnumerable<DirectionEnum> directionsEnumValues;
+        protected List<AnimatorStateMachine> StandardAnimatorSubStateMachines { get; set; }
+        protected List<AnimatorStateMachine> ComplexAnimatorSubStateMachines { get; set; }
+
+        protected AnimatorStateMachine _rootStateMachine;
+        protected IEnumerable<DirectionEnum> _directionsEnumValues;
 
         //Controller Parameters
-        protected const string combatActiveParam = "IsCombatActive";
+        protected const string combatActiveParam = "CombatActive";
         protected const string walkingParam = "Walking";
         protected const string runningParam = "Running";
         protected const string directionParam = "Direction";
+        protected const string attackTypeParam = "AttackType";
+        protected const string defenseTypeParam = "DefenseType";
         protected const string attackSequenceParam = "AttackSequence";
+        protected const string defendingParam = "Defending";
+        protected const string attackingParam = "Attacking";
+
+
+
 
         //SubStateMachines
         protected const string subStateIdleName = "Idle";
@@ -31,11 +40,34 @@ namespace Assets.Scripts.Factories.AnimatorControllers
         protected const string subStateCombatWalkingStanceName = "CombatWalking";
         protected const string subStateRunningName = "Running";
         protected const string subStateAttackingName = "Attacking";
+        protected const string subStateDefenseName = "Defense";
+        protected const string subStateRecoverName = "Recover";
+
+
 
         //Attack States
-        protected const string attackSequence_1 = "AttackSequence_1";
-        protected const string attackSequence_2 = "AttackSequence_2";
-        protected const string attackSequence_3 = "AttackSequence_3";
+        protected const string swingAttackSequence_1_1Handed = "AttackSwing_1h_1";
+        protected const string swingAttackSequence_2_1Handed = "AttackSwing_1h_2";
+        //protected const string swingAttackSequence_3_1Handed = "AttackSwing_1h_3";
+        //protected const string swingAttackSequence_1_2Handed = "AttackSwing_2h_1";
+        //protected const string swingAttackSequence_2_2Handed = "AttackSwing_2h_2";
+        //protected const string swingAttackSequence_3_2Handed = "AttackSwing_2h_3";
+
+        protected const string thrustAttackSequence_1_1Handed = "AttackThrust_1h_1";
+        protected string[] _standardSubStates = new[] { subStateIdleName, subStateWalkingName, subStateCombatIdleStanceName, subStateCombatWalkingStanceName, subStateRunningName};
+        protected string[] _complexSubStates = new[] {  subStateAttackingName, subStateDefenseName, subStateRecoverName };
+        protected string[] _swingAttackStates = new[] { swingAttackSequence_1_1Handed, swingAttackSequence_2_1Handed, /*swingAttackSequence_3_1Handed, swingAttackSequence_1_2Handed, swingAttackSequence_2_2Handed, swingAttackSequence_3_2Handed*/ };
+        protected string[] _thrustAttackStates = new[] { thrustAttackSequence_1_1Handed };
+
+        //Defense States
+        protected const string defenseShieldBlock = "Defense_ShieldBlock";
+        protected const string defenseParryBlock = "Defense_ParryBlock";
+        protected const string defenseDodge = "Defense_Dodge";
+        protected string[] _defenseStates = new[] { defenseShieldBlock, defenseParryBlock, defenseDodge };
+
+        //Recover States
+        protected const string shieldRecover = "Recover_Shield";
+        protected string[] _recoverStates = new[] { shieldRecover };
 
         protected struct TransitionConditions
         {
@@ -44,41 +76,68 @@ namespace Assets.Scripts.Factories.AnimatorControllers
             public string parameterName;
         }
 
-        protected string[] mainSubStates = new[] { subStateIdleName, subStateWalkingName, subStateCombatIdleStanceName, subStateCombatWalkingStanceName, subStateRunningName, subStateAttackingName };
-        protected string[] attackStates = new[] { attackSequence_1, attackSequence_2, attackSequence_3 };
+
+
+
+        protected Motion[] GetMockClips()
+        {
+            string mocksPath = "Animations/Mocks/";
+
+            var animations = Resources.LoadAll<Motion>(mocksPath);
+            return animations;
+        }
 
         protected virtual void GenerateAnimations(string controllerName, List<Motion> motionClips)
         {
-            AnimatorSubStateMachines = new List<AnimatorStateMachine>();
 
-            directionsEnumValues = Enum.GetValues(typeof(DirectionEnum)).Cast<DirectionEnum>();
+            StandardAnimatorSubStateMachines = new List<AnimatorStateMachine>();
+            ComplexAnimatorSubStateMachines = new List<AnimatorStateMachine>();
 
-            string pathWithFileName = string.Format("{0}{1}{2}.controller", currentControllersPath, controllerName, sufixControllerName);
+
+            _directionsEnumValues = Enum.GetValues(typeof(DirectionEnum)).Cast<DirectionEnum>();
+
+            string pathWithFileName = string.Format("{0}{1}{2}.controller", _currentControllersPath, controllerName, _sufixControllerName);
 
             var controller = AnimatorController.CreateAnimatorControllerAtPath(pathWithFileName);
 
             //Parameters
-            controller.AddParameter(combatActiveParam, AnimatorControllerParameterType.Bool);
-            controller.AddParameter(walkingParam, AnimatorControllerParameterType.Bool);
-            controller.AddParameter(runningParam, AnimatorControllerParameterType.Bool);
-            controller.AddParameter(directionParam, AnimatorControllerParameterType.Int);
-            controller.AddParameter(attackSequenceParam, AnimatorControllerParameterType.Int);
+            AddParamsToAnimatorController(controller);
 
 
             //StatesMachines (SubState-Machines)
-            rootStateMachine = controller.layers[0].stateMachine;
+            _rootStateMachine = controller.layers[0].stateMachine;
 
-            CreateSubStateMachines(motionClips);
-            CreateInternalAttackingTransitionBetweenStates(AnimatorSubStateMachines.First(x => x.name == subStateAttackingName));
-            CreateInternalDirectionTransitionBetweenStates();
+            CreateStandardSubStateMachines(motionClips);
+            CreateComplexSubStateMachines(motionClips);
+
+            CreateAttackSubStateMachine();
+            CreateDefenseSubStateMachine();
 
             CreateTransitionBetweenSubStatesMachines();
+
+            CreateInternalDirectionTransitionBetweenStates(StandardAnimatorSubStateMachines);
+
         }
 
-  
+        private static void AddParamsToAnimatorController(AnimatorController controller)
+        {
+            controller.AddParameter(combatActiveParam, AnimatorControllerParameterType.Bool);
+            controller.AddParameter(walkingParam, AnimatorControllerParameterType.Bool);
+            controller.AddParameter(runningParam, AnimatorControllerParameterType.Bool);
+            controller.AddParameter(defendingParam, AnimatorControllerParameterType.Bool);
+
+            controller.AddParameter(attackingParam, AnimatorControllerParameterType.Trigger);
+
+            controller.AddParameter(directionParam, AnimatorControllerParameterType.Int);
+            controller.AddParameter(attackTypeParam, AnimatorControllerParameterType.Int);
+            controller.AddParameter(defenseTypeParam, AnimatorControllerParameterType.Int);
+            controller.AddParameter(attackSequenceParam, AnimatorControllerParameterType.Int);
+        }
+
         int GetDirectionValueFromEnum(string directionName)
         {
-            return directionsEnumValues.First(x => x.ToString() == directionName).GetHashCode();
+            directionName = directionName.Split('_').First();
+            return _directionsEnumValues.First(x => x.ToString() == directionName).GetHashCode();
         }
 
         void SetTimeSettingsForTransition(AnimatorStateTransition transition)
@@ -95,64 +154,109 @@ namespace Assets.Scripts.Factories.AnimatorControllers
                 speed = .05f;
             }
             state.speed = speed;
+
+            //DEBUG
+            speed = .05f;
         }
 
-        void CreateSubStateMachines(List<Motion> motionClips)
+        #region SUB-STATE CREATION
+        void CreateStandardSubStateMachines(List<Motion> motionClips)
         {
-            for (int i = 0; i < mainSubStates.Length; i++)
+            for (int i = 0; i < _standardSubStates.Length; i++)
             {
                 //Create Sub-States
-                var currentSubStateMachine = rootStateMachine.AddStateMachine(mainSubStates[i]);
+                var currentSubStateMachine = _rootStateMachine.AddStateMachine(_standardSubStates[i]);
 
-                AnimatorSubStateMachines.Add(currentSubStateMachine);
+                StandardAnimatorSubStateMachines.Add(currentSubStateMachine);
 
-                if (currentSubStateMachine.name == subStateAttackingName)
-                {
-                    AddAttackDirectionsIntoSubStateMachine(currentSubStateMachine, motionClips);
-                    continue;
-                }
                 AddDirectionStateIntoSubStateMachine(currentSubStateMachine, motionClips);
             }
         }
 
-        void AddAttackDirectionsIntoSubStateMachine(AnimatorStateMachine attackSubStateMachine, List<Motion> motionClips)
+        void CreateComplexSubStateMachines(List<Motion> motionClips)
         {
-            foreach (var directionEnum in directionsEnumValues)
+            foreach (var item in _complexSubStates)
+            {
+                //Create Sub-States
+                var currentSubStateMachine = _rootStateMachine.AddStateMachine(item);
+
+                ComplexAnimatorSubStateMachines.Add(currentSubStateMachine);
+
+                //Create states for Attacks
+                if (currentSubStateMachine.name == subStateAttackingName)
+                {
+                    AddAttackStatesIntoSubStateMachine(currentSubStateMachine, motionClips.ToList());
+                    continue;
+                }
+
+                //Create states for defenses
+                if (currentSubStateMachine.name == subStateDefenseName)
+                {
+                    AddDefenseStatesIntoSubStateMachine(currentSubStateMachine, motionClips.ToList());
+                    continue;
+                }
+
+                //Create states for recovers
+                if (currentSubStateMachine.name == subStateRecoverName)
+                {
+                    AddRecoverStatesIntoSubStateMachine(currentSubStateMachine, motionClips.ToList());
+                    continue;
+                }
+            }
+
+        }
+        #endregion
+
+        #region ATTACK STATES
+        void CreateAttackSubStateMachine()
+        {
+            CreateInternalAttackingTransitionBetweenStates(ComplexAnimatorSubStateMachines.First(x => x.name == subStateAttackingName));
+        }
+        void AddAttackStatesIntoSubStateMachine(AnimatorStateMachine attackSubStateMachine, List<Motion> motionClips)
+        {
+            foreach (var directionEnum in _directionsEnumValues)
             {
                 var direction = directionEnum.ToString();
                 if (direction == DirectionEnum.None.ToString()) { continue; }
+
+                var attackStates = new List<string>();
+                attackStates.AddRange(_swingAttackStates);
+                attackStates.AddRange(_thrustAttackStates);
+
                 foreach (var attackStateDirection in attackStates)
                 {
                     //Add states for attack
                     var state = attackSubStateMachine.AddState(string.Format("{0}_{1}", direction.ToString(), attackStateDirection));
 
+                    var attackNameArray = attackStateDirection.ToUpper().Split('_');
+                    var attackName = attackNameArray[0];
+                    var attackSequence = attackNameArray[1];
+                    var attackHands = attackNameArray[2];
+
                     //Find motionClip
+                    var motionClip = motionClips.FirstOrDefault(x => MatchSplittedMockName(x.name, attackName, attackSequence, attackHands, directionEnum.GetHashCode()));
+
+                    state.motion = motionClip;
                 }
             }
         }
 
-        void AddDirectionStateIntoSubStateMachine(AnimatorStateMachine currentSubStateMachine, List<Motion> motionClips)
+        bool MatchSplittedMockName(string mockName, string attackName, string attackHands, string attackSequence, int directionValue)
         {
-            //Add Direction States to the current Sub-State
-            foreach (var direction in directionsEnumValues)
+            var mockNameArray = mockName.ToUpper().Split('_');
+
+            if (!mockNameArray.Any(x => x.Contains("MOCK")) || mockNameArray.Any(x => x.Contains("BLOCK")))
             {
-                //Mecanim must not have ''None'' direction
-                if (direction.ToString() == "None") { continue; }
-
-                string directionName = direction.ToString();
-                var state = currentSubStateMachine.AddState(directionName);
-
-                //Add animation clip to the state, based on the name of the animation clip
-                if (motionClips.Any(x => x.name.ToUpper().Contains(currentSubStateMachine.name.ToUpper())))
-                {
-                    //a1 = angle 1, where 1 = DirectionEnum value
-                    var motionClip = motionClips.First(x => x.name.ToUpper().Contains(currentSubStateMachine.name.ToUpper())
-                    && x.name.Contains(string.Format("a{0}", direction.GetHashCode())));
-
-                    state.motion = motionClip;
-                    SetAnimationSpeed(state, .5f, currentSubStateMachine.name);
-                }
+                return false;
             }
+            var mockDirection = mockNameArray[0];
+            var mockClipName = mockNameArray[2];
+            var mockHands = mockNameArray[3];
+            var mockSequence = mockNameArray[4];
+
+            var result = mockClipName == attackName && mockHands == attackHands && mockSequence == attackSequence && mockDirection == "A" + directionValue;
+            return result;
+
         }
 
         void CreateInternalAttackingTransitionBetweenStates(AnimatorStateMachine attackingSubStateMachine)
@@ -186,14 +290,166 @@ namespace Assets.Scripts.Factories.AnimatorControllers
 
             }
         }
+        #endregion
 
-        void CreateInternalDirectionTransitionBetweenStates()
+        #region DEFENSE STATES
+        void CreateDefenseSubStateMachine()
         {
-            foreach (var stateMachine in AnimatorSubStateMachines)
+            CreateInternalDefenseTransitionBetweenStates(ComplexAnimatorSubStateMachines.First(x => x.name == subStateDefenseName));
+        }
+        void AddDefenseStatesIntoSubStateMachine(AnimatorStateMachine defenseSubStateMachine, List<Motion> motionClips)
+        {
+            foreach (var directionEnum in _directionsEnumValues)
             {
-                //Ignore attacking subStateMachine for directions
-                if (stateMachine.name == subStateAttackingName) { continue; }
+                var direction = directionEnum.ToString();
+                if (direction == DirectionEnum.None.ToString()) { continue; }
 
+                foreach (var defenseState in _defenseStates)
+                {
+                    //Add states for attack
+                    var state = defenseSubStateMachine.AddState(string.Format("{0}_{1}", direction.ToString(), defenseState));
+
+                    var defenseNameArray = defenseState.ToUpper().Split('_');
+                    var defenseDirection = "A" + directionEnum.GetHashCode();
+                    var defenseName = defenseNameArray[0];
+                    var defenseType = defenseNameArray[1];
+
+                    //Find motionClip
+                    //ex of motion name: a1_defense_shieldblock
+                    var motionClip = motionClips.FirstOrDefault(x => MatchMotionClipWithDefenseState(x.name, defenseDirection, defenseName, defenseType));
+
+                    if (motionClip != null)
+                    {
+                        state.motion = motionClip;
+                    }
+                }
+            }
+        }
+
+        bool MatchMotionClipWithDefenseState(string motionMockName, string defenseDirection, string defenseName, string defenseType)
+        {
+            var mockNameArray = motionMockName.ToUpper().Split('_');
+
+            if (!mockNameArray.Any(x => x.Contains("DEFENSE")))
+            {
+                return false;
+            }
+
+            var mockDirection = mockNameArray[0];
+            var mockDefenseType = mockNameArray[2];
+
+            var result = mockDirection == defenseDirection && mockDefenseType == defenseType;
+            return result;
+        }
+
+        void CreateInternalDefenseTransitionBetweenStates(AnimatorStateMachine defenseSubStateMachine)
+        {
+            //Iterate each state inside the state machine
+
+            foreach (var originAnimatorState in defenseSubStateMachine.states)
+            {
+                var defenseType = originAnimatorState.state.name.Split('_').Last();
+                var defenseStatesOfSameType = defenseSubStateMachine.states.Where(x => x.state.name.Split('_').Contains(defenseType));
+
+                foreach (var destinationAnimatorState in defenseStatesOfSameType)
+                {
+                    var currentState = originAnimatorState.state;
+
+                    var destinationState = destinationAnimatorState.state;
+                    var originState = originAnimatorState.state;
+
+                    if (destinationState == originState) { continue; }
+
+                    var currStateToDestinationState = currentState.AddTransition(destinationState);
+
+                    //Get value from enum based on same name of the state
+                    var directionValue = GetDirectionValueFromEnum(destinationState.name.Split('_').First());
+                    currStateToDestinationState.AddCondition(AnimatorConditionMode.Equals, directionValue, directionParam);
+
+                    SetTimeSettingsForTransition(currStateToDestinationState);
+                }
+            }
+        }
+        #endregion
+
+        #region RECOVER STATES
+        void AddRecoverStatesIntoSubStateMachine(AnimatorStateMachine recoverSubStateMachine, List<Motion> motionClips)
+        {
+            foreach (var directionEnum in _directionsEnumValues)
+            {
+                var direction = directionEnum.ToString();
+                if (direction == DirectionEnum.None.ToString()) { continue; }
+
+                foreach (var recoverState in _recoverStates)
+                {
+                    //Add states for attack
+                    var state = recoverSubStateMachine.AddState(string.Format("{0}_{1}", direction.ToString(), recoverState));
+
+                    var recoverNameArray = recoverState.ToUpper().Split('_');
+                    var recoverDirection = "A" + directionEnum.GetHashCode();
+                    var recoverName = recoverNameArray[0];
+                    var recoverType = recoverNameArray[1];
+
+
+                    //Find motionClip
+                    //ex of motion name: a1_shield_recover
+                    var motionClip = motionClips.FirstOrDefault(x => MatchMotionClipWithRecoverState(x.name, recoverDirection, recoverName, recoverType));
+
+                    if (motionClip != null)
+                    {
+                        state.motion = motionClip;
+                    }
+                }
+            }
+        }
+
+
+        bool MatchMotionClipWithRecoverState(string motionMockName, string recoverDirection, string defenseName, string recoverType)
+        {
+            var mockNameArray = motionMockName.ToUpper().Split('_');
+
+            if (!mockNameArray.Any(x => x.Contains("RECOVER")))
+            {
+                return false;
+            }
+
+            var mockDirection = mockNameArray[0];
+            var mockDefenseType = mockNameArray[2];
+
+            var result = mockDirection == recoverDirection && mockDefenseType == recoverType;
+            return result;
+        }
+        #endregion
+
+        void AddDirectionStateIntoSubStateMachine(AnimatorStateMachine currentSubStateMachine, List<Motion> motionClips)
+        {
+            //Add Direction States to the current Sub-State
+            foreach (var direction in _directionsEnumValues)
+            {
+                //Mecanim must not have ''None'' direction
+                if (direction.ToString() == "None") { continue; }
+
+                string directionName = direction.ToString();
+                var state = currentSubStateMachine.AddState(string.Format("{0}_{1}", directionName, currentSubStateMachine.name));
+
+                //Add animation clip to the state, based on the name of the animation clip
+                if (motionClips.Any(x => x.name.ToUpper().Contains(currentSubStateMachine.name.ToUpper())))
+                {
+                    //a1 = angle 1, where 1 = DirectionEnum value
+                    var motionClip = motionClips.First(x => x.name.ToUpper().Contains(currentSubStateMachine.name.ToUpper())
+                    && x.name.Contains(string.Format("a{0}", direction.GetHashCode())));
+
+                    state.motion = motionClip;
+                    SetAnimationSpeed(state, .5f, currentSubStateMachine.name);
+                }
+            }
+        }
+
+
+        void CreateInternalDirectionTransitionBetweenStates(List<AnimatorStateMachine> animatorSubStateMachines)
+        {
+            foreach (var stateMachine in animatorSubStateMachines)
+            {
                 //Iterate each state inside the state machine
                 for (int i = 0; i < stateMachine.states.Length; i++) //currentState
                 {
@@ -221,13 +477,18 @@ namespace Assets.Scripts.Factories.AnimatorControllers
 
         void CreateTransitionBetweenSubStatesMachines()
         {
-            //Idle -> Walking
-            var idleSubStateMachine = AnimatorSubStateMachines.First(x => x.name == subStateIdleName);
-            var walkingSubStateMachine = AnimatorSubStateMachines.First(x => x.name == subStateWalkingName);
-            var combatIdleSubStateMachine = AnimatorSubStateMachines.First(x => x.name == subStateCombatIdleStanceName);
-            var combatWalkingSubStateMachine = AnimatorSubStateMachines.First(x => x.name == subStateCombatWalkingStanceName);
-            var runningSubStateMachine = AnimatorSubStateMachines.First(x => x.name == subStateRunningName);
+            //Standard Sub-State Machines
+            var idleSubStateMachine = StandardAnimatorSubStateMachines.First(x => x.name == subStateIdleName);
+            var walkingSubStateMachine = StandardAnimatorSubStateMachines.First(x => x.name == subStateWalkingName);
+            var combatIdleSubStateMachine = StandardAnimatorSubStateMachines.First(x => x.name == subStateCombatIdleStanceName);
+            var combatWalkingSubStateMachine = StandardAnimatorSubStateMachines.First(x => x.name == subStateCombatWalkingStanceName);
+            var runningSubStateMachine = StandardAnimatorSubStateMachines.First(x => x.name == subStateRunningName);
 
+            //Complex Sub-State Machines
+            var defenseSubStateMachine = ComplexAnimatorSubStateMachines.First(x => x.name == subStateDefenseName);
+            var attackSubStateMachine = ComplexAnimatorSubStateMachines.First(x => x.name == subStateAttackingName);
+            
+            //Idle -> Walking
             TransitionBetweenIdleWalking(idleSubStateMachine, walkingSubStateMachine);
 
             //Combat Transitions
@@ -241,8 +502,13 @@ namespace Assets.Scripts.Factories.AnimatorControllers
             TransitionBetweenIdleRunning(idleSubStateMachine, runningSubStateMachine);
 
             //Attacking Transitions
+            TransitionBetweenAttackCombatIdle(attackSubStateMachine, combatIdleSubStateMachine);
+
+            //Defense Transitions
+            TransitionBetweenDefenseIdle(defenseSubStateMachine, idleSubStateMachine);
         }
 
+        #region IDLE TRANSITIONS
         private void TransitionBetweenIdleWalking(AnimatorStateMachine idleSubStateMachine, AnimatorStateMachine walkingSubStateMachine)
         {
             var transitionConditions = new TransitionConditions[1];
@@ -255,6 +521,7 @@ namespace Assets.Scripts.Factories.AnimatorControllers
             transitionConditions[0] = new TransitionConditions() { conditionMode = AnimatorConditionMode.IfNot, parameterName = walkingParam };
             CreateOneWayTransitionCondition(walkingSubStateMachine, idleSubStateMachine, transitionConditions);
         }
+        #endregion
 
         #region COMBAT TRANSITIONS
         private void TransitionBetweenWalkingCombatWalking(AnimatorStateMachine walkingSubStateMachine, AnimatorStateMachine combatWalkingSubStateMachine)
@@ -347,9 +614,57 @@ namespace Assets.Scripts.Factories.AnimatorControllers
             CreateOneWayTransitionCondition(runningSubStateMachine, idleSubStateMachine, transitionConditions);
         }
         #endregion
+
+        #region DEFENSE TRANSITIONS
+        private void TransitionBetweenDefenseIdle(AnimatorStateMachine defenseSubStateMachine, AnimatorStateMachine idleSubStateMachine)
+        {
+            var transitionConditions = new TransitionConditions[4];
+            // Idle -> Defense
+            transitionConditions[0] = new TransitionConditions() { conditionMode = AnimatorConditionMode.IfNot, parameterName = walkingParam };
+            transitionConditions[1] = new TransitionConditions() { conditionMode = AnimatorConditionMode.IfNot, parameterName = runningParam };
+            transitionConditions[2] = new TransitionConditions() { conditionMode = AnimatorConditionMode.If, parameterName = defendingParam };
+            transitionConditions[3] = new TransitionConditions() { conditionMode = AnimatorConditionMode.Equals, parameterName = defenseTypeParam};
+
+            CreateOneWayTransitionConditionComplexNamesToStandard(idleSubStateMachine, defenseSubStateMachine, transitionConditions, idleSubStateMachine.name);
+
+            //Defense -> Idle
+            transitionConditions = new TransitionConditions[3];
+
+            transitionConditions[0] = new TransitionConditions() { conditionMode = AnimatorConditionMode.IfNot, parameterName = walkingParam };
+            transitionConditions[1] = new TransitionConditions() { conditionMode = AnimatorConditionMode.IfNot, parameterName = runningParam };
+            transitionConditions[2] = new TransitionConditions() { conditionMode = AnimatorConditionMode.IfNot, parameterName = defendingParam };
+            CreateOneWayTransitionConditionComplexNamesToStandard(defenseSubStateMachine, idleSubStateMachine, transitionConditions, idleSubStateMachine.name);
+        }
+
+        #endregion
+
+        #region ATTACKING TRANSITIONS
+        private void TransitionBetweenAttackCombatIdle(AnimatorStateMachine attackSubStateMachine, AnimatorStateMachine combatIdleSubStateMachine)
+        {
+            var transitionConditions = new TransitionConditions[3];
+            // CombatIdle -> Attack
+            transitionConditions[0] = new TransitionConditions() { conditionMode = AnimatorConditionMode.If, parameterName = combatActiveParam };
+            transitionConditions[1] = new TransitionConditions() { conditionMode = AnimatorConditionMode.If, parameterName = attackingParam };
+            transitionConditions[2] = new TransitionConditions() { conditionMode = AnimatorConditionMode.Equals, parameterName = attackTypeParam };
+
+
+            CreateAllWaysTransitionConditionAttackingStateToStandard(combatIdleSubStateMachine, attackSubStateMachine, transitionConditions, combatIdleSubStateMachine.name);
+
+            //Attack -> CombatIdle
+            transitionConditions = new TransitionConditions[1];
+
+            transitionConditions[0] = new TransitionConditions() { conditionMode = AnimatorConditionMode.If, parameterName = combatActiveParam };
+            CreateAllWaysTransitionConditionAttackingStateToStandard(attackSubStateMachine, combatIdleSubStateMachine, transitionConditions, combatIdleSubStateMachine.name);
+        }
+        #endregion
+
+        #region TRANSITION METHODS BETWEEN SUBSTATEMACHINES
         //Create transitions only when it'll leave an specific direction from a subStateMachine to the same into another subStateMachine
         void CreateOneWayTransitionCondition(AnimatorStateMachine originStateMachines, AnimatorStateMachine destinationStateMachines, TransitionConditions[] transitionConditions)
         {
+            string originDirection = string.Empty;
+            string destinationDirection = string.Empty;
+
             //Origin -> Destination
             foreach (var originStateMachine in originStateMachines.states)
             {
@@ -359,18 +674,21 @@ namespace Assets.Scripts.Factories.AnimatorControllers
                 {
                     var destinationState = destinationStateMachine.state;
 
+                    originDirection = originState.name.Split('_').First();
+                    destinationDirection = destinationState.name.Split('_').First();
+
                     //This stateMachine can only transit to another state machine from  a single state to another (i.e: Walking Left -> Combat Left)
-                    if (originState.name != destinationState.name) { continue; }
+                    if (originDirection != destinationDirection) { continue; }
 
                     var currStateToDestinationState = originState.AddTransition(destinationState);
 
                     //Get value from enum based on same name of the state
-                    var directionValue = GetDirectionValueFromEnum(destinationState.name);
+                    var directionValue = GetDirectionValueFromEnum(destinationState.name.Split('_').First());
                     currStateToDestinationState.AddCondition(AnimatorConditionMode.Equals, directionValue, directionParam);
 
                     foreach (var transitionCondition in transitionConditions)
                     {
-                        currStateToDestinationState.AddCondition(transitionCondition.conditionMode, 1, transitionCondition.parameterName);
+                        currStateToDestinationState.AddCondition(transitionCondition.conditionMode, transitionCondition.threshold, transitionCondition.parameterName);
                     }
                 }
             }
@@ -391,15 +709,116 @@ namespace Assets.Scripts.Factories.AnimatorControllers
                     var currStateToDestinationState = originState.AddTransition(destinationState);
 
                     //Get value from enum based on same name of the state
-                    var directionValue = GetDirectionValueFromEnum(destinationState.name);
+                    var directionValue = GetDirectionValueFromEnum(destinationState.name.Split('_').First());
                     currStateToDestinationState.AddCondition(AnimatorConditionMode.Equals, directionValue, directionParam);
 
                     foreach (var transitionCondition in transitionConditions)
                     {
-                        currStateToDestinationState.AddCondition(transitionCondition.conditionMode, 1, transitionCondition.parameterName);
+                        currStateToDestinationState.AddCondition(transitionCondition.conditionMode, transitionCondition.threshold, transitionCondition.parameterName);
                     }
                 }
             }
         }
+
+        void CreateOneWayTransitionConditionComplexNamesToStandard(AnimatorStateMachine originStateMachines, AnimatorStateMachine destinationStateMachines, TransitionConditions[] transitionConditions, string standardStateName)
+        {
+            string directionName = string.Empty;
+            string defenseType = string.Empty;
+            string originDirection = string.Empty;
+            string destinationDirection = string.Empty;
+
+            //Origin -> Destination
+            foreach (var originStateMachine in originStateMachines.states)
+            {
+                var originState = originStateMachine.state;
+
+                foreach (var destinationStateMachine in destinationStateMachines.states)
+                {
+                    var destinationState = destinationStateMachine.state;
+
+                    //This stateMachine can only transit to another state machine from  a single state to another (i.e: Walking Left -> Combat Left)
+                    if(originStateMachines.name == subStateIdleName)
+                    {
+                        directionName = destinationState.name.Split('_').First();
+                        defenseType = destinationState.name.Split('_').Last();
+                        originDirection = originState.name.Split('_').First();
+
+                        if (originDirection != directionName)
+                        {
+                            continue;
+                        }
+                    }else
+                    {
+                        directionName = originState.name.Split('_').First();
+                        defenseType = originState.name.Split('_').Last();
+                        destinationDirection = destinationState.name.Split('_').First();
+
+                        if (directionName  != destinationDirection)
+                        {
+                            continue;
+                        }
+                    }
+
+                    var currStateToDestinationState = originState.AddTransition(destinationState);
+
+                    //Get value from enum based on same name of the state
+                    var directionValue = GetDirectionValueFromEnum(directionName);
+                    currStateToDestinationState.AddCondition(AnimatorConditionMode.Equals, directionValue, directionParam);
+
+                    foreach (var transitionCondition in transitionConditions)
+                    {
+                        int thresholdValue = ((DefenseTypeEnum)Enum.Parse(typeof(DefenseTypeEnum), defenseType)).GetHashCode();
+                        currStateToDestinationState.AddCondition(transitionCondition.conditionMode, thresholdValue, transitionCondition.parameterName);
+                    }
+                }
+            }
+        }
+
+        void CreateAllWaysTransitionConditionAttackingStateToStandard(AnimatorStateMachine originStateMachines, AnimatorStateMachine destinationStateMachines, TransitionConditions[] transitionConditions, string standardStateName)
+        {
+            string directionName = string.Empty;
+            string actionType = string.Empty;
+            int sequence = 0;
+
+            //Origin -> Destination
+            foreach (var originStateMachine in originStateMachines.states)
+            {
+                var originState = originStateMachine.state;
+
+                foreach (var destinationStateMachine in destinationStateMachines.states)
+                {
+                    var destinationState = destinationStateMachine.state;
+
+                    //This stateMachine can only transit to another state machine from  a single state to another (i.e: Walking Left -> Combat Left)
+                    if (originStateMachines.name == standardStateName.Split('_').Last())
+                    {
+                        directionName = destinationState.name.Split('_').First();
+                        actionType = destinationState.name.Split('_').Skip(1).Take(1).First();
+                        sequence = Convert.ToInt32(destinationState.name.Split('_').Last());
+                    }
+                    else
+                    {
+                        directionName = originState.name.Split('_').First();
+                        actionType = originState.name.Split('_').Skip(1).Take(1).First();
+                        sequence = Convert.ToInt32(originState.name.Split('_').Last());
+                    }
+
+
+                    var currStateToDestinationState = originState.AddTransition(destinationState);
+
+                    //Get value from enum based on same name of the state
+                    var directionValue = GetDirectionValueFromEnum(directionName);
+                    currStateToDestinationState.AddCondition(AnimatorConditionMode.Equals, directionValue, directionParam);
+                    currStateToDestinationState.AddCondition(AnimatorConditionMode.Equals, sequence, attackSequenceParam);
+
+                    foreach (var transitionCondition in transitionConditions)
+                    {
+                        int thresholdValue = ((AttackTypeEnum)Enum.Parse(typeof(AttackTypeEnum), actionType)).GetHashCode();
+                        currStateToDestinationState.AddCondition(transitionCondition.conditionMode, thresholdValue, transitionCondition.parameterName);
+                    }
+                }
+            }
+        }
+        #endregion
     }
 }

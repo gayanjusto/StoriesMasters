@@ -155,6 +155,10 @@ namespace Assets.Scripts.Managers.Inputs
 
         public bool IsMoving()
         {
+            if (_canOnlyChangeDirection)
+            {
+                return false;
+            }
             return _horizontalDirection != DirectionEnum.None || _verticalDirection != DirectionEnum.None;
         }
 

@@ -4,6 +4,7 @@ using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Managers.Movement;
 using UnityEngine;
 using UnityEngine.AI;
+using Assets.Scripts.Interfaces.Managers.Combat;
 
 namespace Assets.Scripts.Managers.Movement
 {
@@ -11,6 +12,7 @@ namespace Assets.Scripts.Managers.Movement
     {
         public Transform _target;
         public Transform _directionRotator;
+        IAttackStatusManager _attackStatusManager;
 
         NavMeshAgent _agent;
         float _facingAngle;
@@ -25,6 +27,8 @@ namespace Assets.Scripts.Managers.Movement
             _previousPosition = transform.position;
             _directionRotator = transform.Find("DirectionRotator");
             _agent = GetComponent<NavMeshAgent>();
+            _attackStatusManager = GetComponent<IAttackStatusManager>();
+
             //target = GameObject.Find("Player").transform;
             //Set navMeshAgentSpeed
             //agent.destination = GameObject.Find("Player").transform.position;//target.position;
@@ -119,7 +123,7 @@ namespace Assets.Scripts.Managers.Movement
 
         public bool IsMoving()
         {
-            if (transform.position != _previousPosition)
+            if (transform.position != _previousPosition && !_attackStatusManager.IsAttacking())
             {
                 _previousPosition = transform.position;
                 return true;

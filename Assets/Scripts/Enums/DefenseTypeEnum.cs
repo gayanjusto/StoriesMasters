@@ -2,6 +2,9 @@
 {
     public enum DefenseTypeEnum
     {
-        Block = 1
+        None = 0,
+        ShieldBlock = 1,
+        ParryBlock = 2,
+        Dodge = 3
     }
 }
