@@ -18,6 +18,7 @@ namespace Assets.Scripts.Services
 {
     public class AttackService : IAttackService
     {
+        //teste
         private ICombatVisualInformationService _combatVisualInfoService = IoCContainer.GetImplementation<ICombatVisualInformationService>();
 
         public AttackService()
