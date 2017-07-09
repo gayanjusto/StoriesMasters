@@ -5,8 +5,6 @@ namespace Assets.Scripts.Interfaces.Managers.Objects
 {
     public interface IObjectManager
     {
-        BaseCreature GetBaseCreature();
-        BaseAppObject GetBaseAppObject();
-
+        GameAppObject GetGameAppObject();
     }
 }

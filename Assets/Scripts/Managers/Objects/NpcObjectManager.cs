@@ -6,16 +6,14 @@ namespace Assets.Scripts.Managers.Objects
 {
     public class NpcObjectManager : BaseObjectManager, IObjectManager
     {
-        public NpcAppObject _npcAppObject;
+        public GameAppObject _npcAppObject;
 
         private void Awake()
         {
-            base.SetCreature();
-
-            _npcAppObject = NpcAppObjectFactory.Create(gameObject, _creature);
+            _npcAppObject = GameAppObjectFactory.Create(gameObject);
         }
 
-        public BaseAppObject GetBaseAppObject()
+        public GameAppObject GetGameAppObject()
         {
             return _npcAppObject;
         }

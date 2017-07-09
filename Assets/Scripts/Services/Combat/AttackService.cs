@@ -1,307 +1,84 @@
 ﻿using Assets.Scripts.Entities.ApplicationObjects;
-using Assets.Scripts.Entities.IntelligentBodies;
-using Assets.Scripts.Interfaces.Managers.Itens;
-using Assets.Scripts.Interfaces.Managers.Objects;
-using Assets.Scripts.Interfaces.Services;
-using System.Collections.Generic;
+using Assets.Scripts.Interfaces.Services.Combat;
+using Assets.Scripts.Factories.Services.Combat;
 using UnityEngine;
-using System.Linq;
+using Assets.Scripts.Interfaces.Managers.Combat;
 using System;
 using Assets.Scripts.Enums;
-using Assets.Scripts.Interfaces.Controllers;
-using Assets.Scripts.IoC;
-using Assets.Scripts.Interfaces.Managers.Movement;
-using Assets.Scripts.Interfaces.Managers.Combat;
-using Assets.Scripts.Interfaces.Managers;
+using Assets.Scripts.Interfaces.Managers.Itens;
 
-namespace Assets.Scripts.Services
+namespace Assets.Scripts.Services.Combat
 {
     public class AttackService : IAttackService
     {
-        //teste
-        private ICombatVisualInformationService _combatVisualInfoService = IoCContainer.GetImplementation<ICombatVisualInformationService>();
 
-        public AttackService()
+        public void AttackTargets(GameAppObject[] targets, GameAppObject attacker)
         {
-            _combatVisualInfoService = IoCContainer.GetImplementation<ICombatVisualInformationService>();
-        }
+            //-> Get Attacker CurrentSkill by CurrentEquippedWeapon
+            var equippedWeapon = attacker.gameObject.GetComponent<IEquippedItensManager>().GetEquippedWeapon();
 
-        #region PRIVATE METHODS
-        IList<BaseAppObject> GetTargetsHitByStockAttack(BaseAppObject attackingObj, BaseAppObject target, ref IList<BaseAppObject> targetsHit)
-        {
-            if (target == null)
+            float attackerSkillValue = attacker.combatSkills.GetSkillValueByName(equippedWeapon.SkillUsed);
+
+            //-> Get attacker current attack type
+            AttackTypeEnum attackType = AttackTypeEnum.AttackThrust;
+
+            //Debug -> Remove
+            attacker.attributes.Strength = 100;
+
+            for (int i = 0; i < targets.Length; i++)
             {
-                return targetsHit;
-            }
+                //calculate chance of hitting target
+                //-> Get attacker value of attack chance
+                float attackerAttackValue = attacker.attackCalculation.GetAttackValue(attackerSkillValue, attackType);
 
-            BaseAppObject targetHit = AttackTarget(attackingObj, target);
-            if (targetHit != null)
-            {
-                targetsHit.Add(targetHit);
-            }
+                //Get target's current skill value based on its current equipped defense
+                var targetEquippedDefense = targets[i].gameObject.GetComponent<IEquippedItensManager>().GetDefenseItem();
 
-            return targetsHit;
-        }
+                float targetDefenseSkillValue = 0;
 
-        IList<BaseAppObject> GetTargetsHitBySwingAttack(BaseAppObject attackingObj, BaseAppObject[] targets, ref IList<BaseAppObject> hitTargets)
-        {
+                //Get target's current defense system, if none: consider dodge
+                DefenseTypeEnum targetDefenseType = DefenseTypeEnum.ShieldBlock;
 
-            hitTargets = AttackTargets(attackingObj, targets);
-
-
-            return hitTargets;
-        }
-
-        IList<BaseAppObject> AttackByType(BaseAppObject attackingObj, BaseAppObject[] targets)
-        {
-            IList<BaseAppObject> hitTargets = new List<BaseAppObject>();
-
-            switch (attackingObj.GetMonoBehaviourObject<IAttackStatusManager>().CurrentAttackType())
-            {
-                case AttackTypeEnum.AttackThrust:
-                return GetTargetsHitByStockAttack(attackingObj, targets[0], ref hitTargets);
-                break;
-                case AttackTypeEnum.AttackSwing:
-                GetTargetsHitBySwingAttack(attackingObj, targets, ref hitTargets);
-                break;
-                case AttackTypeEnum.Ranged:
-                break;
-                default:
-                return null;
-            }
-
-            return hitTargets;
-        }
-
-
-
-        void MiniStunTargets(IList<BaseAppObject> targets)
-        {
-            Debug.Log("Mini stunned targets");
-
-            for (int i = 0; i < targets.Count; i++)
-            {
-                MiniStunTarget(targets[i]);
-            }
-        }
-
-        BaseAppObject AttackTarget(BaseAppObject attackerObj, BaseAppObject target)
-        {
-            //attacker has suffered any action that prevents him from continue his attack
-            if (attackerObj.HasActionsPrevented)
-            {
-                return null;
-            }
-
-            //Calculate chances of hitting target or if target has already blocked this attacker
-            if (attackerObj.CanAttackTarget(target))
-            {
-                var equippedWeapon = attackerObj.GetMonoBehaviourObject<IEquippedItensManager>().GetEquippedWeapon();
-                double damageDealtToTarget = attackerObj.GetDamageDealt(equippedWeapon);
-
-                target.ReceiveDamage(damageDealtToTarget);
-
-                DisableParryDefense(target);
-
-                return target;
-            }
-
-            // DisableParryDefense(target);
-
-            return null;
-        }
-
-        IList<BaseAppObject> AttackTargets(BaseAppObject attackerObj, BaseAppObject[] targetsObjs)
-        {
-            if (attackerObj.HasActionsPrevented)
-            {
-                return null;
-            }
-
-            double damageDealtToTarget = attackerObj.GetDamageDealt(attackerObj.GetMonoBehaviourObject<IEquippedItensManager>().GetEquippedWeapon());
-
-            List<BaseAppObject> creaturesHit = new List<BaseAppObject>();
-            for (int i = 0; i < targetsObjs.Length; i++)
-            {
-
-                //Calculate chances of hitting target or if target has already blocked this attacker
-                if (!attackerObj.CanAttackTarget(targetsObjs[i]))
+                //If there's not equippedDefense, target will use Dodge skill
+                if (targetEquippedDefense == null)
                 {
-                    break; //If target has simply dodged, it should continue the attack to the next target
+                    targetDefenseSkillValue = targets[i].combatSkills.DodgeSkill.SkillValue;
+                    targetDefenseType = DefenseTypeEnum.Dodge;
+                }
+                else
+                {
+                    targetDefenseSkillValue = targets[i].combatSkills.GetSkillValueByName(targetEquippedDefense.SkillUsed);
+                    targetDefenseType = targetEquippedDefense.DefenseType;
                 }
 
-                //Decrease damage by each target
-                if (i > 0)
+                //Get target's chance
+                float targetDefenseValue = targets[i].defenseCalculation.GetDefenseValue(targetDefenseSkillValue, targetDefenseType);
+
+                //Debug -> Remove
+                targets[i].attributes.Strength = 100;
+
+                //if target is hit, deal damage to it
+                if (attackerAttackValue > targetDefenseValue)
                 {
-                    damageDealtToTarget -= (damageDealtToTarget * (i * 10)) / (100);
+                    Debug.Log(string.Format("Target hit. Attacker Value: {0} / Target Value: {1}", attackerAttackValue, targetDefenseValue));
+                }
+                else
+                {
+                    Debug.Log(string.Format("Target NOT hit. Attacker Value: {0} / Target Value: {1}", attackerAttackValue, targetDefenseValue));
                 }
 
-                targetsObjs[i].ReceiveDamage(damageDealtToTarget);
-                creaturesHit.Add(targetsObjs[i]);
+                //Get chance of skill increase for attacker
+                //if able to increase, increase current attacking skill
+
+                //GetChance of skill increase for target's defenses
+                //if able to increase, increase current defense skill
+
+                //Get chance of attribute increase for attacker
+                //if able to increase, increase used attribute for attack
+
+                //Get chance of attribute increase for target
+                //if able to increase, increase used attribute for defense
             }
-
-            //After a target being attacked, it should disable his parry defense
-            //for it's no longer necessary
-            for (int i = 0; i < targetsObjs.Length; i++)
-            {
-                DisableParryDefense(targetsObjs[i]);
-            }
-
-            return creaturesHit;
-        }
-
-        void DisableParryDefense(BaseAppObject defender)
-        {
-            var defenderCombatManager = defender.GetMonoBehaviourObject<ICombatManager>();
-            defenderCombatManager.SetHasCastAction(false);
-            defenderCombatManager.SetParryingTarget(null);
-            defenderCombatManager.SetIsAttemptingToParryAttack(false);
-
-        }
-
-        bool CanAttackTarget(BaseAppObject target, BaseAppObject attacker)
-        {
-            var targetCombatManager = target.GetMonoBehaviourObject<ICombatManager>();
-            //Target has already defended the attack from this attacker
-            if (targetCombatManager.IsAttemptingToParry() && targetCombatManager.GetParryingTarget() == attacker)
-            {
-                Debug.Log("Blocked attack with parry");
-
-                return false;
-            }
-
-            //If is attacking a target that is parrying a different attacker, then this attacker will have
-            //an instant success.
-            if (targetCombatManager.IsAttemptingToParry() && targetCombatManager.GetParryingTarget() != attacker)
-            {
-                Debug.Log(target.GameObject.name + " foi atacado por outro objeto e perdeu a defesa");
-                return true;
-            }
-
-            //Target is trying to block with a shield
-            if (targetCombatManager.IsBlockingWithShield())
-            {
-                MiniStunTarget(target);
-
-                if (TargetIsBlockingAttackerDirectionsWithShield(attacker, target))
-                {
-                    Debug.Log(target.GameObject.name + " is trying to block with shield");
-                    return target.DefendAttack(attacker, DefenseTypeEnum.ShieldBlock);
-                }
-                else //Target is not blocking attacker direction resulting in Instant hit
-                {
-                    return true;
-                }
-            }
-
-            //return: Int + Dex + Skill + Rand 100 X enemie's
-            return true;
-        }
-        #endregion
-
-        public bool Attack(BaseAppObject attackingObj)
-        {
-            //Play AttackAnimation
-
-            IAttackStatusManager attackerAttackStatusManager = attackingObj.GetMonoBehaviourObject<IAttackStatusManager>();
-            IAttackSequenceManager attackSequenceManager = attackingObj.GetMonoBehaviourObject<IAttackSequenceManager>();
-
-            attackingObj.GetMonoBehaviourObject<IBaseAnimationManager>().PlayAttackAnimation(attackSequenceManager.AttackSequence(), attackerAttackStatusManager.CurrentAttackType());
-
-            //Remove highlight of incoming attack for player
-            _combatVisualInfoService.RemoveHighlightAttackerInformation(attackingObj);
-
-            var attackCombatManager = attackingObj.GetMonoBehaviourObject<ICombatManager>();
-            //has already casted an attack, so it should be set to false
-            //It's set to true in AttackObserver
-            attackCombatManager.SetIsAttacking(false);
-
-            //Set delay after attack
-            //REFACTOR: Get delay time based on attributes
-            attackCombatManager.SetRecoverTimeFromAttack(2.0f);
-
-            //Play Recover Animation
-
-            var attackerTargets = attackCombatManager.GetTargets();
-
-            //Increase attack sequence
-            // attackingObj.CombatManager.IncreaseSequenceWaitForAction();
-
-            if (attackerTargets == null || attackerTargets.Count() == 0)
-            {
-                return false;
-            }
-
-            IList<BaseAppObject> targetsHitByAttack = AttackByType(attackingObj, attackerTargets);
-
-
-            //Was a successful attack?
-            if (targetsHitByAttack != null && targetsHitByAttack.Count > 0)
-            {
-                MiniStunTargets(targetsHitByAttack);
-                attackingObj.IncreaseCombatSkillPoint();
-
-                //check if any target has died
-                for (int i = 0; i < targetsHitByAttack.Count; i++)
-                {
-                    if (!targetsHitByAttack[i].IsAlive())
-                    {
-                        targetsHitByAttack[i].Die();
-                    }
-                }
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool TargetIsBlockingAttackerDirectionsWithShield(BaseAppObject attacker, BaseAppObject target)
-        {
-            IMovementController movementController = IoCContainer.GetImplementation<IMovementController>();
-            IDirectionService directionService = IoCContainer.GetImplementation<IDirectionService>();
-
-            DirectionEnum attackerFacingDirection = attacker.GameObject.GetComponent<IFacingDirection>().GetFacingDirection();
-            DirectionEnum[] targetBlockingDirections = directionService.GetNeighborDirections(target);
-
-            for (int i = 0; i < targetBlockingDirections.Length; i++)
-            {
-                if (targetBlockingDirections[i] == directionService.GetOppositeDirection(attackerFacingDirection))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public void MiniStunTarget(BaseAppObject target)
-        {
-            target.GetMonoBehaviourObject<ICombatManager>().SetRecoverTimeFromAttack(2.5f);
-            target.HasActionsPrevented = true;
-        }
-
-        public void MiniStunTarget(BaseAppObject target, float timeToStun)
-        {
-            target.GetMonoBehaviourObject<ICombatManager>().SetRecoverTimeFromAttack(timeToStun);
-        }
-
-        public float GetTimeForAttackDelay(BaseAppObject target)
-        {
-            //ToDo: Calculate time based on skills / equipment / weight
-            return 5.0f;
-        }
-
-        public bool AttackIsPastHalfWay(BaseAppObject attacker)
-        {
-            //attack has spend more than half of the total of the swing/freeze time
-            var attackerCombatManager = attacker.GetMonoBehaviourObject<ICombatManager>();
-            return attackerCombatManager.GetCurrentTimeForAttackDelay() < (attackerCombatManager.GetTotalFreezeTime() / 2);
-        }
-
-        public AttackTypeEnum GenerateAttackTypeForNpc(BaseAppObject npc)
-        {
-            //DEBUG
-            return AttackTypeEnum.AttackSwing;
         }
     }
 }

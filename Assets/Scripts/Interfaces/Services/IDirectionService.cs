@@ -21,7 +21,7 @@ namespace Assets.Scripts.Interfaces.Services
         /// </summary>
         /// <param name="facingDirection"></param>
         /// <returns></returns>
-        DirectionEnum[] GetNeighborDirections(BaseAppObject movingObj);
+        DirectionEnum[] GetNeighborDirections(GameAppObject movingObj);
      
         /// <summary>
         /// Returns the opposite direction of a given one

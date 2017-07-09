@@ -4,6 +4,7 @@ using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Services;
 using UnityEngine;
 using Assets.Scripts.Entities.ApplicationObjects;
+using Assets.Scripts.Interfaces.Managers;
 
 namespace Assets.Scripts.Services
 {
@@ -278,9 +279,9 @@ namespace Assets.Scripts.Services
             }
         }
 
-        public DirectionEnum[] GetNeighborDirections(BaseAppObject movingObj)
+        public DirectionEnum[] GetNeighborDirections(GameAppObject movingObj)
         {
-            DirectionEnum facingDirection = movingObj.GetFacingDirection();
+            DirectionEnum facingDirection = movingObj.gameObject.GetComponent<IDirectionManager>().GetFacingDirection();
             DirectionEnum[] directions = new DirectionEnum[3];
 
             DirectionEnum[] neighborDirections = GetNeighborDirections(facingDirection.GetHashCode());

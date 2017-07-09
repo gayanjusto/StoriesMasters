@@ -1,19 +1,9 @@
 ﻿using Assets.Scripts.Entities.ApplicationObjects;
-using Assets.Scripts.Entities.IntelligentBodies;
-using Assets.Scripts.Enums;
-using System.Collections.Generic;
-using UnityEngine;
 
-namespace Assets.Scripts.Interfaces.Services
+namespace Assets.Scripts.Interfaces.Services.Combat
 {
     public interface IAttackService
     {
-        bool Attack(BaseAppObject attackingObj);
-        bool TargetIsBlockingAttackerDirectionsWithShield(BaseAppObject attacker, BaseAppObject target);
-        void MiniStunTarget(BaseAppObject target);
-        void MiniStunTarget(BaseAppObject target, float timeToStun);
-        float GetTimeForAttackDelay(BaseAppObject target);
-        bool AttackIsPastHalfWay(BaseAppObject attacker);
-        AttackTypeEnum GenerateAttackTypeForNpc(BaseAppObject npc);
+        void AttackTargets(GameAppObject[] targets, GameAppObject attacker);
     }
 }

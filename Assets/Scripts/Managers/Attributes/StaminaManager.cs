@@ -8,7 +8,6 @@ namespace Assets.Scripts.Managers.Attributes
     {
         public bool _decreasingStamina;
 
-        public BaseCreature _moveableEntity;
 
         public void SetDecreasingStamina(bool decreasingStamina)
         {
@@ -23,7 +22,6 @@ namespace Assets.Scripts.Managers.Attributes
         void Start()
         {
             _maximumTickTime = 1.0f; //1.0 seconds
-            _moveableEntity = gameObject.GetComponent<IObjectManager>().GetBaseCreature() as BaseCreature;
             ResetTickTime();
 
             Disable();
@@ -50,21 +48,12 @@ namespace Assets.Scripts.Managers.Attributes
 
         void DecreaseStamina()
         {
-            if (_moveableEntity.Stamina > 0)
-            {
-                _moveableEntity.Stamina--;
-            }
+           
         }
 
         void IncreaseStamina()
         {
-            if(_moveableEntity.Stamina < _moveableEntity.MaximumStamina)
-            {
-                _moveableEntity.Stamina++;
-            }else
-            {
-                Disable();
-            }
+          
         }
 
 

@@ -2,7 +2,16 @@
 {
     public interface IMovementManager : IBaseMonoBehaviour
     {
-        bool IsMoving();
-        void SetCanChangeDirectionButNotMove(bool canOnlyChangeDirection);
+        bool GetIsMoving();
+        void SetIsMoving(bool isMoving);
+
+        bool GetLockedMovement();
+        void SetLockedMovement(bool lockedMovement);
+
+        bool GetIsRunning();
+        void SetIsRunning(bool isRunning);
+
+        bool GetObjectFrozen();
+        void SetObjectFrozen(bool isFrozen);
     }
 }

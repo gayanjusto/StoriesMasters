@@ -1,29 +1,16 @@
-﻿using Assets.Scripts.Entities.ApplicationObjects;
-using Assets.Scripts.Enums;
+﻿using System.Collections;
 
 namespace Assets.Scripts.Interfaces.Managers.Combat
 {
-    public interface ICombatManager : IBaseMonoBehaviour, IDefenseStatusManager, IAttackSequenceManager, IAttackStatusManager
+    public interface ICombatManager
     {
-        void EnableAttackerActions();
-        void DisableAttackerActions();
-        void SetRecoverTimeFromAttack(float freezeTime);
-        bool GetHasCastAction();
-        void SetTargets(BaseAppObject[] targets);
-        BaseAppObject[] GetTargets();
+        bool GetIsDefending();
+        void SetIsDefending(bool isDefending);
 
-        void SetParryingTarget(BaseAppObject target);
+        bool GetIsAttacking();
 
-        BaseAppObject GetParryingTarget();
-        DirectionEnum[] GetBlockingDirections();
+        bool CanCastAction();
 
-        void SetHasCastAction(bool hasCastAnAction);
-
-        bool IsAbleToInitiateAttack();
-        void SetAttackReady(bool isAttackReady);
-        bool IsReadyToAttack();
-        float GetCurrentTimeForAttackDelay();
-        float GetTotalFreezeTime();
-        void SetIsAttemptingToParryAttack(bool isAttemptingToParry);
+        void InitiateAttack();
     }
 }

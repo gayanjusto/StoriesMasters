@@ -8,7 +8,7 @@ using Assets.Scripts.Interfaces.Managers.Combat;
 
 namespace Assets.Scripts.Managers.Movement
 {
-    public class NpcMovementManager : BaseMonoBehaviour, IMovementManager, INpcMovementManager, IFacingDirection
+    public class NpcMovementManager : BaseMonoBehaviour, INpcMovementManager, IFacingDirection
     {
         public Transform _target;
         public Transform _directionRotator;
@@ -121,7 +121,7 @@ namespace Assets.Scripts.Managers.Movement
             return DirectionEnum.None;
         }
 
-        public bool IsMoving()
+        public bool GetIsMoving()
         {
             if (transform.position != _previousPosition && !_attackStatusManager.IsAttacking())
             {
@@ -142,9 +142,9 @@ namespace Assets.Scripts.Managers.Movement
             this._target = target.transform;
         }
 
-        public void SetCanChangeDirectionButNotMove(bool canOnlyChangeDirection)
+        public void LockMovement(bool lockMovement)
         {
-            _canOnlyChangeDirection = canOnlyChangeDirection;
+            _canOnlyChangeDirection = lockMovement;
         }
     }
 }

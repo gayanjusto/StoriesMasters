@@ -2,15 +2,16 @@
 using Assets.Scripts.Enums;
 using Assets.Scripts.Interfaces.Services;
 using UnityEngine;
-using Assets.Scripts.IoC;
 using System.Linq;
 using Assets.Scripts.Constants;
+using Assets.Scripts.Factories.Services.Movement;
 
 namespace Assets.Scripts.Services
 {
     public class TargetService : ITargetService
     {
         private readonly IDirectionService _directionService;
+
         private const float targetStockSphereRadius = 1.0f;
         private const float targetArchRadius = .1f;
         private const float targetSemiCircleRadius = .5f;
@@ -18,7 +19,7 @@ namespace Assets.Scripts.Services
 
         public TargetService()
         {
-            _directionService = IoCContainer.GetImplementation<IDirectionService>();
+            _directionService = DirectionServiceFactory.GetInstance();
         }
 
   

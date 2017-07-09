@@ -1,14 +1,13 @@
-﻿using Assets.Scripts.Entities.ApplicationObjects;
-using Assets.Scripts.Enums;
-using Assets.Scripts.Interfaces.Managers.Objects;
-using Assets.Scripts.Interfaces.Services;
-using Assets.Scripts.IoC;
+﻿using System;
+using Assets.Scripts.Entities.ApplicationObjects;
+using Assets.Scripts.Interfaces.Services.Combat;
 using System.Linq;
-using System;
-using Assets.Scripts.Interfaces.Managers.Movement;
-using Assets.Scripts.Interfaces.Managers.Combat;
+using Assets.Scripts.Interfaces.Services;
+using Assets.Scripts.Factories.Services.Combat;
+using Assets.Scripts.Interfaces.Managers.Objects;
+using Assets.Scripts.Interfaces.Managers;
 
-namespace Assets.Scripts.Services
+namespace Assets.Scripts.Services.Combat
 {
     public class AttackTargetService : IAttackTargetService
     {
@@ -16,78 +15,40 @@ namespace Assets.Scripts.Services
 
         public AttackTargetService()
         {
-            _targetService = IoCContainer.GetImplementation<ITargetService>();
+            _targetService = TargetServiceFactory.GetInstance();
         }
-        #region PRIVATE METHODS
-        BaseAppObject[] GetTargetsByAttackType(BaseAppObject attackingObj)
-        {
-            //IEquippedItensManager equippedItensManager = attackingObj.GetComponent<IEquippedItensManager>();
-
-            BaseAppObject[] returningTargets = null;
-
-            switch (attackingObj.GetMonoBehaviourObject<IAttackStatusManager>().CurrentAttackType())
-            {
-                case AttackTypeEnum.AttackThrust:
-                GetTargertFacingDirection(attackingObj, ref returningTargets);
-                break;
-                case AttackTypeEnum.AttackSwing:
-                GetTargetsSemiCircleArea(attackingObj, ref returningTargets);//
-                break;
-                //AttackTargetService: get targets surrouding 3 blocks object
-                //attack target
-                break;
-                case AttackTypeEnum.Ranged:
-                break;
-            }
-
-            return returningTargets;
-        }
-
-        BaseAppObject[] GetTargertFacingDirection(BaseAppObject attackingObj, ref BaseAppObject[] returningTargets)
+        #region PRIVATE
+        GameAppObject[] GetTargetFacingDirection(GameAppObject attackingObj, ref GameAppObject[] returningTargets)
         {
 
-            var target = _targetService.GetTargetForFacingDirection(attackingObj.GameObject, attackingObj.GetFacingDirection());
+            var target = _targetService.GetTargetForFacingDirection(attackingObj.gameObject, attackingObj.gameObject.GetComponent<IDirectionManager>().GetFacingDirection());
+
             if (target != null)
             {
-                returningTargets = new BaseAppObject[1];
-                returningTargets[0] = target.GetComponent<IObjectManager>().GetBaseAppObject();
-            }
-
-            return returningTargets;
-        }
-
-        BaseAppObject[] GetTargetsSemiCircleArea(BaseAppObject attackingObj, ref BaseAppObject[] returningTargets)
-        {
-            ITargetService attackTargetService = IoCContainer.GetImplementation<ITargetService>();
-
-            var targets = attackTargetService.GetTargetsForSemiCircle(attackingObj.GameObject, attackingObj.GetFacingDirection());
-            if (targets != null && targets.Length > 0)
-            {
-                returningTargets = new BaseAppObject[targets.Length];
-                returningTargets = targets.Select(x => x.GetComponent<IObjectManager>().GetBaseAppObject()).ToArray();
+                returningTargets = new GameAppObject[1];
+                returningTargets[0] = target.GetComponent<IObjectManager>().GetGameAppObject();
             }
 
             return returningTargets;
         }
         #endregion
 
-        public BaseAppObject[] GetTargetsForAttack(BaseAppObject attackingObj)
+        public GameAppObject[] GetFacingTargets(GameAppObject actionObj)
         {
-            BaseAppObject[] targets = GetTargetsByAttackType(attackingObj);
+            GameAppObject[] targets = null;
+            GetTargetFacingDirection(actionObj, ref targets);
 
-            return targets;
-        }
-
-        public BaseAppObject GetFacingTarget(BaseAppObject actionObj)
-        {
-            BaseAppObject[] targets = null;
-            GetTargertFacingDirection(actionObj, ref targets);
-
-            if(targets == null)
+            if (targets == null)
             {
                 return null;
             }
-            return targets.FirstOrDefault();
+            return targets;
+        }
+
+
+        public GameAppObject[] GetTargetsForAttack(GameAppObject attackingObj)
+        {
+            throw new NotImplementedException();
         }
     }
 }

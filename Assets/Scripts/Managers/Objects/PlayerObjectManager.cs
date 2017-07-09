@@ -1,40 +1,21 @@
 ﻿using Assets.Scripts.Entities.ApplicationObjects;
-using Assets.Scripts.Entities.IntelligentBodies;
 using Assets.Scripts.Factories;
-using Assets.Scripts.Interfaces.Factories;
-using Assets.Scripts.Interfaces.Managers.Inputs;
-using Assets.Scripts.Interfaces.Managers.Movement;
 using Assets.Scripts.Interfaces.Managers.Objects;
-using Assets.Scripts.IoC;
 
 namespace Assets.Scripts.Managers.Objects
 {
     public class PlayerObjectManager : BaseObjectManager, IObjectManager
     {
-        public PlayerAppObject _playerAppObject;
+        public GameAppObject _playerGameAppObject;
 
-        private void Start()
+        public void Start()
         {
-            base.SetCreature();
-
-            _playerAppObject = PlayerAppObjectFactory.Create(gameObject, _creature);
-
-            //EnableBaseManagers();
+            _playerGameAppObject = GameAppObjectFactory.Create(gameObject);
         }
 
-        void EnableBaseManagers()
+        public GameAppObject GetGameAppObject()
         {
-            //GetComponent<IMovementManager>().Enable();
-            //if (GetComponent<IPlayerCombatInputManager>() != null)
-            //{
-            //    GetComponent<IPlayerCombatInputManager>().Enable();
-            //}
-        
-
-        }
-        public BaseAppObject GetBaseAppObject()
-        {
-            return _playerAppObject;
+            return _playerGameAppObject;
         }
     }
 }

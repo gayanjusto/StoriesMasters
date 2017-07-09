@@ -1,10 +1,10 @@
 ﻿using Assets.Scripts.Entities.ApplicationObjects;
 
-namespace Assets.Scripts.Interfaces.Services
+namespace Assets.Scripts.Interfaces.Services.Combat
 {
     public interface IAttackTargetService
     {
-        BaseAppObject[] GetTargetsForAttack(BaseAppObject attackingObj);
-        BaseAppObject GetFacingTarget(BaseAppObject actionObj);
+        GameAppObject[] GetTargetsForAttack(GameAppObject attackingObj);
+        GameAppObject[] GetFacingTargets(GameAppObject actionObj);
     }
 }
